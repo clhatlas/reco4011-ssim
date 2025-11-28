@@ -15,7 +15,7 @@ const FactorInput: React.FC<Props> = ({ factors, onNext }) => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h2 className="text-2xl font-bold text-slate-900">Model Factors</h2>
-          <p className="text-slate-500">The following 10 factors are fixed for this CritNet model.</p>
+          <p className="text-slate-500">The following are the 10 most critical factors identified from literature review and responses collected from questionnaires answered by AEC industry personnel.</p>
         </div>
       </div>
 
