@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { ISMResult, ISMElement } from '../types';
 import HierarchyGraph from './HierarchyGraph';
+import InterrelationshipGraph from './InterrelationshipGraph';
+import AnalysisTable from './AnalysisTable';
 import { Download, Printer } from 'lucide-react';
 
 interface Props {
@@ -11,10 +13,11 @@ interface Props {
 }
 
 const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
-  const [activeTab, setActiveTab] = useState<'graph' | 'irm' | 'frm' | 'levels'>('graph');
+  const [activeTab, setActiveTab] = useState<'hierarchy' | 'digraph' | 'analysis' | 'irm' | 'frm'>('hierarchy');
 
   const handleDownloadPNG = () => {
-    const svgElement = document.getElementById('hierarchy-graph-svg') as unknown as SVGSVGElement;
+    const svgId = activeTab === 'digraph' ? 'interrelationship-graph-svg' : 'hierarchy-graph-svg';
+    const svgElement = document.getElementById(svgId) as unknown as SVGSVGElement;
     if (!svgElement) return;
 
     // Use XMLSerializer to convert SVG to string
@@ -45,7 +48,7 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
             // Trigger download
             const link = document.createElement('a');
             link.href = pngData;
-            link.download = 'ISM_Hierarchy_Model.png';
+            link.download = `ISM_${activeTab === 'digraph' ? 'Digraph' : 'Hierarchy'}.png`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -86,41 +89,45 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
 
   return (
     <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 no-print">
+      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 no-print">
         <div>
           <h2 className="text-2xl font-bold text-slate-900">ISM Model Analysis</h2>
-          <p className="text-slate-500">Visual hierarchy and matrix computations.</p>
+          <p className="text-slate-500">Visual hierarchy, partitioning analysis, and matrix computations.</p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 w-full xl:w-auto">
            <button 
              onClick={handlePrint}
              className="flex items-center gap-2 px-3 py-2 bg-slate-100 text-slate-700 rounded-md hover:bg-slate-200 transition-colors text-sm font-medium"
            >
               <Printer className="w-4 h-4" /> Print PDF
            </button>
-           {activeTab === 'graph' && (
+           {(activeTab === 'hierarchy' || activeTab === 'digraph') && (
                <button 
                  onClick={handleDownloadPNG}
                  className="flex items-center gap-2 px-3 py-2 bg-slate-100 text-slate-700 rounded-md hover:bg-slate-200 transition-colors text-sm font-medium"
                >
-                  <Download className="w-4 h-4" /> Export PNG
+                  <Download className="w-4 h-4" /> Export Graph
                </button>
            )}
            <div className="w-px h-8 bg-slate-300 mx-2 hidden md:block"></div>
-           <div className="flex gap-1 bg-white border border-slate-200 p-1 rounded-lg shadow-sm">
-            {(['graph', 'levels', 'frm', 'irm'] as const).map(tab => (
+           <div className="flex flex-wrap gap-1 bg-white border border-slate-200 p-1 rounded-lg shadow-sm">
+            {[
+                { id: 'hierarchy', label: 'Hierarchy Model' },
+                { id: 'digraph', label: 'Interrelationships' },
+                { id: 'analysis', label: 'Analysis Table' },
+                { id: 'frm', label: 'Final Matrix' },
+                { id: 'irm', label: 'Initial Matrix' },
+            ].map(tab => (
                 <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
                 className={`px-3 py-2 rounded-md text-sm font-medium transition-all ${
-                    activeTab === tab 
+                    activeTab === tab.id 
                     ? 'bg-indigo-600 text-white shadow' 
                     : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
                 }`}
                 >
-                {tab === 'graph' ? 'Graph' : 
-                tab === 'levels' ? 'Levels' :
-                tab === 'frm' ? 'Final Matrix' : 'Init. Matrix'}
+                {tab.label}
                 </button>
             ))}
             </div>
@@ -128,10 +135,23 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
       </div>
 
       <div className="bg-white rounded-xl p-1 border border-slate-200 shadow-xl min-h-[500px] print-content">
-        {activeTab === 'graph' && (
+        {activeTab === 'hierarchy' && (
           <div className="p-4 h-full">
             <HierarchyGraph result={result} factors={factors} />
           </div>
+        )}
+
+        {activeTab === 'digraph' && (
+          <div className="p-4 h-full">
+            <InterrelationshipGraph result={result} factors={factors} />
+          </div>
+        )}
+
+        {activeTab === 'analysis' && (
+           <div className="p-6">
+             <h3 className="text-lg font-semibold text-slate-900 mb-4">Level Partitioning & Set Analysis</h3>
+             <AnalysisTable factors={factors} result={result} />
+           </div>
         )}
 
         {activeTab === 'irm' && (
@@ -146,27 +166,6 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
              <h3 className="text-lg font-semibold text-slate-900 mb-4">Final Reachability Matrix (Transitive)</h3>
              <p className="text-sm text-slate-500 mb-4">Includes implied links derived from transitivity (if A&rarr;B and B&rarr;C, then A&rarr;C).</p>
              {renderMatrix(result.finalReachabilityMatrix)}
-           </div>
-        )}
-
-        {activeTab === 'levels' && (
-           <div className="p-6">
-             <h3 className="text-lg font-semibold text-slate-900 mb-4">Level Partitioning Iterations</h3>
-             <div className="space-y-4">
-               {result.levels.map((lvl) => (
-                 <div key={lvl.level} className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                   <h4 className="text-indigo-600 font-bold mb-2">Level {lvl.level}</h4>
-                   <div className="flex flex-wrap gap-2">
-                     {lvl.elements.map(idx => (
-                       <div key={idx} className="bg-white px-3 py-1 rounded border border-slate-200 text-slate-700 text-sm flex items-center gap-2 shadow-sm">
-                         <span className="font-mono text-slate-400">{idx + 1}.</span>
-                         {factors[idx].name}
-                       </div>
-                     ))}
-                   </div>
-                 </div>
-               ))}
-             </div>
            </div>
         )}
       </div>

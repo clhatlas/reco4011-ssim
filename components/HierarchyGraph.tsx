@@ -19,7 +19,7 @@ const HierarchyGraph: React.FC<Props> = ({ result, factors }) => {
 
     const { levels, canonicalMatrix } = result;
     const width = containerRef.current.clientWidth || 800;
-    const levelHeight = 140; // Increased spacing
+    const levelHeight = 140; // Spacing
     const height = Math.max(600, levels.length * levelHeight + 100);
     const nodeRadius = 22;
 
@@ -27,20 +27,20 @@ const HierarchyGraph: React.FC<Props> = ({ result, factors }) => {
       .attr("width", width)
       .attr("height", height)
       .attr("viewBox", [0, 0, width, height])
-      .style("background-color", "#ffffff"); // White background
+      .style("background-color", "#ffffff");
 
     // Define Arrowhead marker
     svg.append("defs").append("marker")
       .attr("id", "arrowhead")
       .attr("viewBox", "0 -5 10 10")
-      .attr("refX", nodeRadius + 8) // Offset to not overlap node
+      .attr("refX", nodeRadius + 8)
       .attr("refY", 0)
       .attr("markerWidth", 6)
       .attr("markerHeight", 6)
       .attr("orient", "auto")
       .append("path")
       .attr("d", "M0,-5L10,0L0,5")
-      .attr("fill", "#94a3b8"); // Slate 400
+      .attr("fill", "#94a3b8");
 
     const nodes: any[] = [];
     
@@ -87,11 +87,6 @@ const HierarchyGraph: React.FC<Props> = ({ result, factors }) => {
             const dy = d.target.y - d.source.y;
             const dr = Math.sqrt(dx * dx + dy * dy); 
             
-            // If link is bottom-up (Driving -> Dependent), which is standard visual flow in ISM:
-            // But here Y increases downwards.
-            // If target level (e.g. 1) < source level (e.g. 3). Target Y < Source Y.
-            // This is an UPWARD arrow.
-            
             // Check if same level
             if (d.source.level === d.target.level) {
                  // Curve for same level
@@ -102,7 +97,7 @@ const HierarchyGraph: React.FC<Props> = ({ result, factors }) => {
             return `M${d.source.x},${d.source.y}L${d.target.x},${d.target.y}`;
         })
         .attr("fill", "none")
-        .attr("stroke", "#94a3b8") // Slate 400
+        .attr("stroke", "#94a3b8")
         .attr("stroke-width", 2)
         .attr("marker-end", "url(#arrowhead)");
 
@@ -118,8 +113,8 @@ const HierarchyGraph: React.FC<Props> = ({ result, factors }) => {
     // Node Circle
     nodeGroups.append("circle")
         .attr("r", nodeRadius)
-        .attr("fill", "#ffffff") // White fill
-        .attr("stroke", (d:any) => d.level === 1 ? "#10b981" : "#6366f1") // Level 1 Emerald-500, others Indigo-500
+        .attr("fill", "#ffffff")
+        .attr("stroke", (d:any) => d.level === 1 ? "#10b981" : "#6366f1")
         .attr("stroke-width", 3)
         .attr("filter", "drop-shadow(0px 2px 4px rgba(0,0,0,0.1))");
 
@@ -128,7 +123,7 @@ const HierarchyGraph: React.FC<Props> = ({ result, factors }) => {
         .attr("dy", 5)
         .attr("text-anchor", "middle")
         .text((d: any) => d.id + 1)
-        .attr("fill", "#1e293b") // Slate 800
+        .attr("fill", "#1e293b")
         .attr("font-weight", "bold")
         .attr("font-family", "monospace")
         .attr("font-size", "14px");
@@ -140,7 +135,7 @@ const HierarchyGraph: React.FC<Props> = ({ result, factors }) => {
     textGroup.append("text")
         .attr("text-anchor", "middle")
         .text((d: any) => d.data.name)
-        .attr("fill", "#334155") // Slate 700
+        .attr("fill", "#334155")
         .attr("font-size", "11px")
         .attr("font-weight", "600")
         .each(function(d: any) {
@@ -151,15 +146,8 @@ const HierarchyGraph: React.FC<Props> = ({ result, factors }) => {
                  self.append("title").text(name);
              }
         });
-        
-    textGroup.append("text")
-        .attr("dy", 14)
-        .attr("text-anchor", "middle")
-        .text((d: any) => d.data.category || "")
-        .attr("fill", "#64748b") // Slate 500
-        .attr("font-size", "9px");
 
-    // Level Indicators (on the left)
+    // Level Indicators
     const uniqueLevels = [...new Set(nodes.map((n:any) => n.level))].sort((a,b) => a-b);
     
     svg.selectAll(".level-label")
@@ -169,7 +157,7 @@ const HierarchyGraph: React.FC<Props> = ({ result, factors }) => {
        .attr("x", 20)
        .attr("y", (d: any, i) => 50 + (i * levelHeight))
        .text((d: any) => `Level ${d}`)
-       .attr("fill", "#64748b") // Slate 500
+       .attr("fill", "#64748b")
        .attr("font-weight", "bold")
        .attr("font-size", "14px")
        .attr("alignment-baseline", "middle");

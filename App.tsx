@@ -6,8 +6,8 @@ import ResultsView from './components/ResultsView';
 import { runISMAnalysis } from './services/ismLogic';
 import { HardHat, Wand2 } from 'lucide-react';
 
-// Fixed 10 factors F1-F10
-const FIXED_FACTORS: ISMElement[] = Array.from({ length: 10 }, (_, i) => ({
+// Fixed 12 factors F1-F12
+const FIXED_FACTORS: ISMElement[] = Array.from({ length: 12 }, (_, i) => ({
   id: `f${i + 1}`,
   name: `F${i + 1}`,
   category: "Confined Space Factor",
