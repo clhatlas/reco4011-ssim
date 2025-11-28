@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { ISMElement, SSIMData, SSIMValue } from '../types';
-import { Loader2, Wand2, RotateCcw, Info } from 'lucide-react';
-import { suggestRelationship } from '../services/geminiService';
+import { RotateCcw, Wand2 } from 'lucide-react';
 
 interface Props {
   factors: ISMElement[];
@@ -12,8 +11,7 @@ interface Props {
   onBack: () => void;
 }
 
-const SSIMGrid: React.FC<Props> = ({ factors, ssim, setSsim, topic, onNext, onBack }) => {
-  const [loadingCell, setLoadingCell] = useState<string | null>(null);
+const SSIMGrid: React.FC<Props> = ({ factors, ssim, setSsim, onNext, onBack }) => {
   const [highlightCell, setHighlightCell] = useState<{i: string, j: string} | null>(null);
   const [confirmClear, setConfirmClear] = useState(false);
 
@@ -50,27 +48,6 @@ const SSIMGrid: React.FC<Props> = ({ factors, ssim, setSsim, topic, onNext, onBa
         setConfirmClear(true);
         // Auto-reset confirmation after 3 seconds
         setTimeout(() => setConfirmClear(false), 3000);
-    }
-  };
-
-  const aiSuggestCell = async (iIdx: number, jIdx: number, iId: string, jId: string) => {
-    if (!process.env.API_KEY) return;
-    const key = `${iId}-${jId}`;
-    setLoadingCell(key);
-    
-    try {
-      const relation = await suggestRelationship(topic, factors[iIdx], factors[jIdx]);
-      setSsim(prev => ({
-        ...prev,
-        [iId]: {
-          ...(prev[iId] || {}),
-          [jId]: relation
-        }
-      }));
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoadingCell(null);
     }
   };
 
@@ -152,7 +129,6 @@ const SSIMGrid: React.FC<Props> = ({ factors, ssim, setSsim, topic, onNext, onBa
 
                   // Upper Triangle
                   const val = ssim[rowFactor.id]?.[colFactor.id] || SSIMValue.O;
-                  const isLoading = loadingCell === `${rowFactor.id}-${colFactor.id}`;
                   const isHighlighted = highlightCell?.i === rowFactor.id && highlightCell?.j === colFactor.id;
 
                   return (
@@ -165,21 +141,6 @@ const SSIMGrid: React.FC<Props> = ({ factors, ssim, setSsim, topic, onNext, onBa
                         >
                           {val}
                         </button>
-                        
-                        {/* AI Helper Button */}
-                        {process.env.API_KEY && (
-                          <button
-                             type="button"
-                             onClick={(e) => {
-                               e.stopPropagation();
-                               aiSuggestCell(i, j, rowFactor.id, colFactor.id);
-                             }}
-                             className="absolute -top-2 -right-2 bg-indigo-600 text-white p-0.5 md:p-1 rounded-full opacity-0 group-hover/cell:opacity-100 transition-opacity shadow-lg z-10 hover:bg-indigo-500"
-                             title="Ask AI Suggestion"
-                          >
-                             {isLoading ? <Loader2 className="w-2 h-2 md:w-3 md:h-3 animate-spin"/> : <Wand2 className="w-2 h-2 md:w-3 md:h-3"/>}
-                          </button>
-                        )}
                       </div>
                     </td>
                   );
