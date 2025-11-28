@@ -60,7 +60,7 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
     window.print();
   };
 
-  const renderMatrix = (matrix: number[][]) => (
+  const renderSimpleMatrix = (matrix: number[][]) => (
     <div className="overflow-x-auto">
       <table className="w-full border-collapse text-sm">
         <thead>
@@ -86,6 +86,87 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
       </table>
     </div>
   );
+
+  const renderFRMWithPowers = (frm: number[][], irm: number[][]) => {
+    const size = frm.length;
+    const drivingPowers = frm.map(row => row.reduce((sum, val) => sum + val, 0));
+    const dependencePowers = Array.from({ length: size }, (_, colIndex) => 
+      frm.reduce((sum, row) => sum + row[colIndex], 0)
+    );
+
+    return (
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse text-sm">
+          <thead>
+            <tr>
+              <th className="p-2 border border-slate-200 bg-slate-50 text-slate-500 font-mono text-xs">i \ j</th>
+              {factors.map((_, i) => (
+                <th key={i} className="p-2 border border-slate-200 bg-slate-50 text-slate-700 w-10 text-center" title={factors[i].name}>{i + 1}</th>
+              ))}
+              <th className="p-2 border border-slate-200 bg-indigo-50 text-indigo-700 font-bold whitespace-nowrap text-center">Driving Power</th>
+            </tr>
+          </thead>
+          <tbody>
+            {frm.map((row, i) => (
+              <tr key={i} className="hover:bg-slate-50">
+                 <td className="p-2 border border-slate-200 bg-slate-50 text-slate-700 font-bold text-center whitespace-nowrap" title={factors[i].name}>
+                    <div className="flex items-center gap-2">
+                        <span className="w-6 text-right">{i + 1}</span>
+                        <span className="font-normal text-xs text-slate-500 truncate max-w-[120px] hidden lg:block text-left">{factors[i].name}</span>
+                    </div>
+                 </td>
+                 {row.map((val, j) => {
+                   const isDirect = irm[i][j] === 1;
+                   const isSelf = i === j;
+                   
+                   let displayVal: React.ReactNode = val;
+                   let cellClass = "text-slate-300";
+                   
+                   if (val === 1) {
+                       if (isDirect || isSelf) {
+                           displayVal = "1";
+                           cellClass = "text-slate-900 font-bold";
+                       } else {
+                           displayVal = "1*"; // Transitive
+                           cellClass = "text-emerald-600 font-bold bg-emerald-50";
+                       }
+                   } else {
+                       displayVal = "0";
+                   }
+
+                   return (
+                     <td key={j} className={`p-2 border border-slate-200 text-center ${cellClass}`}>
+                       {displayVal}
+                     </td>
+                   );
+                 })}
+                 <td className="p-2 border border-slate-200 bg-indigo-50 text-indigo-700 font-bold text-center">
+                    {drivingPowers[i]}
+                 </td>
+              </tr>
+            ))}
+            <tr className="bg-orange-50 font-bold border-t-2 border-orange-200">
+                <td className="p-2 border border-slate-200 text-orange-800 font-bold text-center whitespace-nowrap">Dependence Power</td>
+                {dependencePowers.map((val, j) => (
+                    <td key={j} className="p-2 border border-slate-200 text-orange-700 text-center">
+                        {val}
+                    </td>
+                ))}
+                <td className="p-2 border border-slate-200 bg-slate-100"></td>
+            </tr>
+          </tbody>
+        </table>
+        <div className="mt-3 text-xs text-slate-500 flex gap-4">
+            <div className="flex items-center gap-2">
+                <span className="font-bold text-slate-900">1</span>: Direct Relationship
+            </div>
+            <div className="flex items-center gap-2">
+                <span className="font-bold text-emerald-600 bg-emerald-50 px-1 rounded">1*</span>: Transitive Relationship (Inferred)
+            </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
@@ -157,7 +238,7 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
         {activeTab === 'irm' && (
            <div className="p-6">
              <h3 className="text-lg font-semibold text-slate-900 mb-4">Initial Reachability Matrix (IRM)</h3>
-             {renderMatrix(result.initialReachabilityMatrix)}
+             {renderSimpleMatrix(result.initialReachabilityMatrix)}
            </div>
         )}
 
@@ -165,7 +246,7 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
            <div className="p-6">
              <h3 className="text-lg font-semibold text-slate-900 mb-4">Final Reachability Matrix (Transitive)</h3>
              <p className="text-sm text-slate-500 mb-4">Includes implied links derived from transitivity (if A&rarr;B and B&rarr;C, then A&rarr;C).</p>
-             {renderMatrix(result.finalReachabilityMatrix)}
+             {renderFRMWithPowers(result.finalReachabilityMatrix, result.initialReachabilityMatrix)}
            </div>
         )}
       </div>
