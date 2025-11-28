@@ -37,7 +37,7 @@ const SSIMGrid: React.FC<Props> = ({ factors, ssim, setSsim, onNext, onBack }) =
     setHighlightCell({ i: colId, j: rowId });
     setTimeout(() => setHighlightCell(null), 2000);
     
-    alert(`To set relationship "${factors[rowIdx].name} → ${factors[colIdx].name}", please edit cell (${colIdx + 1}, ${rowIdx + 1}) in the upper triangle to 'A'.`);
+    alert(`To set relationship "${factors[rowIdx].name} → ${factors[colIdx].name}", please edit cell (${factors[colIdx].name}, ${factors[rowIdx].name}) in the upper triangle to 'A'.`);
   };
 
   const handleClearClick = () => {
@@ -89,10 +89,10 @@ const SSIMGrid: React.FC<Props> = ({ factors, ssim, setSsim, onNext, onBack }) =
                 i \ j
               </th>
               {factors.map((f, idx) => (
-                <th key={f.id} className="sticky top-0 z-20 bg-white p-2 text-slate-700 font-mono text-xs w-10 md:w-12 text-center border-b border-slate-200 shadow-sm group relative cursor-help">
-                  {idx + 1}
+                <th key={f.id} className="sticky top-0 z-20 bg-white p-2 text-slate-700 font-mono text-xs w-10 md:w-14 text-center border-b border-slate-200 shadow-sm group relative cursor-help">
+                  {f.name}
                   <div className="absolute hidden group-hover:block top-full left-1/2 -translate-x-1/2 bg-slate-800 text-white text-xs p-2 rounded shadow-xl whitespace-nowrap z-40 border border-slate-600 pointer-events-none">
-                    {f.name}
+                    <span className="font-bold">{f.name}:</span> {f.description || f.name}
                   </div>
                 </th>
               ))}
@@ -101,10 +101,10 @@ const SSIMGrid: React.FC<Props> = ({ factors, ssim, setSsim, onNext, onBack }) =
           <tbody>
             {factors.map((rowFactor, i) => (
               <tr key={rowFactor.id} className="hover:bg-slate-50 transition-colors">
-                <td className="sticky left-0 z-20 bg-white p-2 text-slate-700 text-xs md:text-sm font-medium border-r border-slate-200 min-w-[200px] max-w-[300px] truncate shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]" title={rowFactor.name}>
+                <td className="sticky left-0 z-20 bg-white p-2 text-slate-700 text-xs md:text-sm font-medium border-r border-slate-200 min-w-[200px] max-w-[300px] truncate shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] cursor-help" title={rowFactor.description || rowFactor.name}>
                   <div className="flex items-center gap-2">
-                    <span className="inline-block w-6 text-slate-400 font-mono text-right">{i + 1}.</span>
-                    <span className="truncate">{rowFactor.name}</span>
+                    <span className="inline-block w-8 text-slate-400 font-mono text-right">{rowFactor.name}.</span>
+                    <span className="truncate">{rowFactor.description || rowFactor.name}</span>
                   </div>
                 </td>
                 {factors.map((colFactor, j) => {
@@ -121,7 +121,7 @@ const SSIMGrid: React.FC<Props> = ({ factors, ssim, setSsim, onNext, onBack }) =
                             key={colFactor.id} 
                             onClick={() => handleLowerTriangleClick(rowFactor.id, colFactor.id, i, j)}
                             className="p-1 bg-slate-50 border border-slate-100 cursor-pointer hover:bg-slate-100 transition-colors"
-                            title={`Go to cell (${j+1}, ${i+1}) to edit this relationship`}
+                            title={`Go to cell (${colFactor.name}, ${rowFactor.name}) to edit this relationship`}
                         >
                         </td>
                      );

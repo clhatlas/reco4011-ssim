@@ -21,7 +21,7 @@ const HierarchyGraph: React.FC<Props> = ({ result, factors }) => {
     const width = containerRef.current.clientWidth || 800;
     const levelHeight = 140; // Spacing
     const height = Math.max(600, levels.length * levelHeight + 100);
-    const nodeRadius = 22;
+    const nodeRadius = 24;
 
     const svg = d3.select(svgRef.current)
       .attr("width", width)
@@ -118,15 +118,15 @@ const HierarchyGraph: React.FC<Props> = ({ result, factors }) => {
         .attr("stroke-width", 3)
         .attr("filter", "drop-shadow(0px 2px 4px rgba(0,0,0,0.1))");
 
-    // Node ID Text
+    // Node ID Text (Using Name/Code like B02 instead of Index)
     nodeGroups.append("text")
         .attr("dy", 5)
         .attr("text-anchor", "middle")
-        .text((d: any) => d.id + 1)
+        .text((d: any) => d.data.name)
         .attr("fill", "#1e293b")
         .attr("font-weight", "bold")
         .attr("font-family", "monospace")
-        .attr("font-size", "14px");
+        .attr("font-size", "12px");
 
     // Label Text (Below node)
     const textGroup = nodeGroups.append("g")
@@ -140,11 +140,13 @@ const HierarchyGraph: React.FC<Props> = ({ result, factors }) => {
         .attr("font-weight", "600")
         .each(function(d: any) {
              const self = d3.select(this);
-             const name = d.data.name;
-             if (name.length > 20) {
-                 self.text(name.substring(0, 18) + "...");
-                 self.append("title").text(name);
+             const desc = d.data.description || "";
+             if (desc.length > 20) {
+                 self.text(desc.substring(0, 18) + "...");
+             } else {
+                 self.text(desc);
              }
+             self.append("title").text(desc);
         });
 
     // Level Indicators

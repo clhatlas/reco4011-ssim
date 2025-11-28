@@ -6,15 +6,23 @@ import ResultsView from './components/ResultsView';
 import { runISMAnalysis } from './services/ismLogic';
 import { HardHat, Wand2 } from 'lucide-react';
 
-// Fixed 12 factors F1-F12
-const FIXED_FACTORS: ISMElement[] = Array.from({ length: 12 }, (_, i) => ({
-  id: `f${i + 1}`,
-  name: `F${i + 1}`,
-  category: "Confined Space Factor",
-  description: "Most Critical Factors"
-}));
+// Fixed 12 factors using B-codes based on the BIM Barriers input
+const FIXED_FACTORS: ISMElement[] = [
+  { id: 'B02', name: 'B02', description: 'Lack of domestic-oriented BIM tools', category: 'Technology' },
+  { id: 'B03', name: 'B03', description: 'Increased workload for model development', category: 'Process' },
+  { id: 'B07', name: 'B07', description: 'Negative attitude towards working collaboratively', category: 'People' },
+  { id: 'B08', name: 'B08', description: 'Lack of a well-established BIM-based workflow', category: 'Process' },
+  { id: 'B09', name: 'B09', description: 'Immature dispute resolution mechanism for BIM implementation', category: 'Policy' },
+  { id: 'B10', name: 'B10', description: 'Lack of professional interactivity', category: 'People' },
+  { id: 'B12', name: 'B12', description: 'Lack of research on BIM implementation in China', category: 'Environment' },
+  { id: 'B13', name: 'B13', description: 'Cost and time required for training', category: 'Cost' },
+  { id: 'B14', name: 'B14', description: 'Cost for BIM experts and tools', category: 'Cost' },
+  { id: 'B15', name: 'B15', description: 'Increased design costs', category: 'Cost' },
+  { id: 'B18', name: 'B18', description: 'Lack of BIM standards', category: 'Policy' },
+  { id: 'B19', name: 'B19', description: 'Lack of standard form of contract for BIM implementation', category: 'Policy' },
+];
 
-const FIXED_TOPIC = "Driving/Dependent Relationships of Factors of Confined Space Accidents";
+const FIXED_TOPIC = "Driving/Dependent Relationships of Critical Factors";
 
 const App: React.FC = () => {
   // Initialize directly to Factor Definition step with fixed data
@@ -60,7 +68,7 @@ const App: React.FC = () => {
               SSIM Construction
             </h1>
             <span className="text-slate-400 hidden md:block">|</span>
-            <p className="text-sm md:text-base font-semibold text-slate-700">Confined Space Critical Factors Network</p>
+            <p className="text-sm md:text-base font-semibold text-slate-700">Critical Factors Network</p>
           </div>
           <div className="hidden md:flex items-center gap-4 text-sm font-medium text-slate-400">
             <span className={step === AppStep.DEFINE_FACTORS ? 'text-indigo-600 font-bold' : ''}>1. Factors</span>

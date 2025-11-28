@@ -24,21 +24,18 @@ const FactorInput: React.FC<Props> = ({ factors, onNext }) => {
           {factors.map((factor, idx) => (
             <div key={factor.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-200 shadow-sm">
               <div className="flex items-center gap-3 overflow-hidden">
-                <span className="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-slate-200 text-slate-600 text-sm font-mono border border-slate-300">
-                  {idx + 1}
+                <span className="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-slate-200 text-slate-700 text-xs font-mono font-bold border border-slate-300">
+                  {factor.name}
                 </span>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="text-slate-900 font-medium truncate">{factor.name}</p>
+                    <p className="text-slate-900 font-medium truncate">{factor.description || factor.name}</p>
                     {factor.category && (
                       <span className="hidden md:inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-indigo-50 text-indigo-600 border border-indigo-200">
                         {factor.category}
                       </span>
                     )}
                   </div>
-                  {factor.description && factor.description !== factor.category && (
-                     <p className="text-xs text-slate-500 truncate">{factor.description}</p>
-                  )}
                   {factor.category && (
                      <span className="md:hidden inline-flex items-center gap-1 text-[10px] text-indigo-500 mt-1">
                         <Tag className="w-3 h-3" /> {factor.category}

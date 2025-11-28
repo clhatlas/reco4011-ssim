@@ -66,15 +66,15 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
         <thead>
           <tr>
             <th className="p-2 border border-slate-200 bg-slate-50 text-slate-500">#</th>
-            {factors.map((_, i) => (
-              <th key={i} className="p-2 border border-slate-200 bg-slate-50 text-slate-700 w-10 text-center">{i + 1}</th>
+            {factors.map((f, i) => (
+              <th key={i} className="p-2 border border-slate-200 bg-slate-50 text-slate-700 w-10 text-center text-xs font-mono">{f.name}</th>
             ))}
           </tr>
         </thead>
         <tbody>
           {matrix.map((row, i) => (
             <tr key={i} className="hover:bg-slate-50">
-               <td className="p-2 border border-slate-200 bg-slate-50 text-slate-700 font-bold text-center">{i + 1}</td>
+               <td className="p-2 border border-slate-200 bg-slate-50 text-slate-700 font-bold text-center text-xs font-mono whitespace-nowrap">{factors[i].name}</td>
                {row.map((val, j) => (
                  <td key={j} className={`p-2 border border-slate-200 text-center ${val === 1 ? 'text-emerald-600 bg-emerald-50 font-bold' : 'text-slate-400'}`}>
                    {val}
@@ -100,8 +100,8 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
           <thead>
             <tr>
               <th className="p-2 border border-slate-200 bg-slate-50 text-slate-500 font-mono text-xs">i \ j</th>
-              {factors.map((_, i) => (
-                <th key={i} className="p-2 border border-slate-200 bg-slate-50 text-slate-700 w-10 text-center" title={factors[i].name}>{i + 1}</th>
+              {factors.map((f, i) => (
+                <th key={i} className="p-2 border border-slate-200 bg-slate-50 text-slate-700 w-10 text-center font-mono text-xs" title={f.name}>{f.name}</th>
               ))}
               <th className="p-2 border border-slate-200 bg-indigo-50 text-indigo-700 font-bold whitespace-nowrap text-center">Driving Power</th>
             </tr>
@@ -111,8 +111,8 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
               <tr key={i} className="hover:bg-slate-50">
                  <td className="p-2 border border-slate-200 bg-slate-50 text-slate-700 font-bold text-center whitespace-nowrap" title={factors[i].name}>
                     <div className="flex items-center gap-2">
-                        <span className="w-6 text-right">{i + 1}</span>
-                        <span className="font-normal text-xs text-slate-500 truncate max-w-[120px] hidden lg:block text-left">{factors[i].name}</span>
+                        <span className="w-8 text-right font-mono text-xs">{factors[i].name}</span>
+                        <span className="font-normal text-xs text-slate-500 truncate max-w-[120px] hidden lg:block text-left">{factors[i].description}</span>
                     </div>
                  </td>
                  {row.map((val, j) => {
