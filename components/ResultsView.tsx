@@ -163,6 +163,7 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
           html += '<tr><td colspan="5"></td></tr>';
       }
       html += '<thead><tr><th>i \\ j</th>';
+      // Columns: Short Name/ID Only
       factors.forEach(f => html += `<th>${f.name}</th>`);
       if(isFinal) html += '<th>Driving Power</th>';
       html += '</tr></thead><tbody>';
@@ -170,6 +171,7 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
       const drivingPowers = matrix.map(row => row.reduce((sum, val) => sum + val, 0));
       const dependencePowers = Array.from({ length: size }, (_, colIndex) => matrix.reduce((sum, row) => sum + row[colIndex], 0));
       matrix.forEach((row, i) => {
+          // Rows: Full Name/Description
           html += `<tr><td>${factors[i].name}: ${factors[i].description || ''}</td>`;
           row.forEach((val, j) => {
               let displayVal = val.toString();
@@ -207,6 +209,7 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
               {factors.map((f, i) => (
                 <th key={i} className="p-2 border border-slate-300 bg-slate-100 text-slate-800 w-12 text-center text-xs font-bold align-bottom h-40">
                   <div className="transform -rotate-90 origin-bottom-left w-6 whitespace-nowrap overflow-visible translate-x-3 mb-2 text-left">
+                    {/* Columns: Short ID Only */}
                     <span className="mr-2 text-slate-900 font-extrabold">{f.name}</span>
                   </div>
                 </th>
@@ -217,6 +220,7 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
             {matrix.map((row, i) => (
               <tr key={i} className="hover:bg-slate-50">
                 <td className="p-2 border border-slate-300 bg-slate-100 text-slate-800 font-bold text-left text-xs whitespace-normal leading-tight" title={factors[i].description}>
+                  {/* Rows: Full Description */}
                   <span className="mr-1">{factors[i].name}:</span>
                   <span className="font-normal text-slate-600">{factors[i].description}</span>
                 </td>
@@ -258,6 +262,7 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
                 {factors.map((f, i) => (
                   <th key={i} className="p-2 border border-slate-300 bg-slate-100 text-slate-800 w-12 text-center text-xs font-bold align-bottom h-40">
                      <div className="transform -rotate-90 origin-bottom-left w-6 whitespace-nowrap overflow-visible translate-x-3 mb-2 text-left">
+                        {/* Columns: Short ID Only */}
                         <span className="mr-2 text-slate-900 font-extrabold">{f.name}</span>
                      </div>
                   </th>
@@ -271,6 +276,7 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
               {frm.map((row, i) => (
                 <tr key={i} className="hover:bg-slate-50">
                    <td className="p-2 border border-slate-300 bg-slate-100 text-slate-800 font-bold text-left whitespace-normal text-xs leading-tight" title={factors[i].description}>
+                        {/* Rows: Full Description */}
                         <span className="mr-1">{factors[i].name}:</span>
                         <span className="font-normal text-slate-600">{factors[i].description}</span>
                    </td>
