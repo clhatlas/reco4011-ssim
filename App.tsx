@@ -113,7 +113,7 @@ const App: React.FC = () => {
                         
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div className="space-y-2">
-                                <h3 className="font-bold text-emerald-800 uppercase text-xs tracking-wider">Step 1: Define Factors</h3>
+                                <h3 className="font-bold text-emerald-800 uppercase text-lg tracking-wider">Step 1: Define Factors</h3>
                                 <p>
                                     Input the critical factors for your study. You can add them manually, or for large datasets, use the 
                                     <strong> Import</strong> feature.
@@ -125,7 +125,7 @@ const App: React.FC = () => {
                             </div>
 
                             <div className="space-y-2">
-                                <h3 className="font-bold text-emerald-800 uppercase text-xs tracking-wider">Step 2: Build SSIM</h3>
+                                <h3 className="font-bold text-emerald-800 uppercase text-lg tracking-wider">Step 2: Build SSIM</h3>
                                 <p>
                                     Establish the contextual relationships between factors in the Structural Self-Interaction Matrix (SSIM).
                                 </p>
@@ -138,7 +138,7 @@ const App: React.FC = () => {
                             </div>
 
                             <div className="space-y-2">
-                                <h3 className="font-bold text-emerald-800 uppercase text-xs tracking-wider">Step 3: Analyze Model</h3>
+                                <h3 className="font-bold text-emerald-800 uppercase text-lg tracking-wider">Step 3: Analyze Model</h3>
                                 <p>
                                     The tool automatically calculates the Reachability Matrix, checks for Transitivity, partitions levels, and generates:
                                 </p>

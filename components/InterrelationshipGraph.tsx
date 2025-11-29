@@ -33,42 +33,72 @@ const InterrelationshipGraph: React.FC<Props> = ({ result, factors }) => {
       .attr("viewBox", [0, 0, width, height])
       .style("background-color", "#ffffff");
 
-    // Calculate Arrowhead Position
-    // We want the tip of the arrow to touch the outer edge of the node circle.
-    // The path goes to the center of the node.
-    // Marker Scaling: markerWidth=8, viewBox="0 0 10 10" -> Scale = 0.8
-    // Visual Distance needed = nodeRadius (24) + stroke/gap (approx 4) = 28px
-    // refX formula: TipX + (Distance / Scale)
-    // TipX is 10 (end of path in viewBox)
-    // refX = 10 + (28 / 0.8) = 10 + 35 = 45
-    const markerScale = 0.8;
-    const distance = nodeRadius + 5; 
-    const refX = 10 + (distance / markerScale);
+    // --- Marker Positioning Logic ---
+    // We use markerUnits="userSpaceOnUse" for precise pixel control.
+    // Node Radius = 24.
+    // Buffer = 5 (gap between node and arrow tip).
+    // Arrow Tip Distance from Center = 29.
+    
+    const arrowDist = nodeRadius + 5;
 
-    // Define Arrowhead marker
-    svg.append("defs").append("marker")
-      .attr("id", "arrowhead-circle")
+    // 1. END Marker (Points Forward >)
+    // Path: 0,-5 L10,0 L0,5 (Tip at 10)
+    // We want Tip (10) to be at `Center - 29`.
+    // refX anchors to Center.
+    // So 10 - refX = -29  =>  refX = 39.
+    const refXEnd = 10 + arrowDist;
+
+    // 2. START Marker (Points Backward <)
+    // Path: 10,-5 L0,0 L10,5 (Tip at 0)
+    // We want Tip (0) to be at `Center + 29` (Start of line).
+    // refX anchors to Center.
+    // So 0 - refX = 29 => refX = -29.
+    const refXStart = -arrowDist;
+
+    const defs = svg.append("defs");
+
+    // Standard End Arrow (Grey)
+    defs.append("marker")
+      .attr("id", "arrowhead-end-grey")
       .attr("viewBox", "0 -5 10 10")
-      .attr("refX", refX) 
+      .attr("refX", refXEnd) 
       .attr("refY", 0)
-      .attr("markerWidth", 8)
-      .attr("markerHeight", 8)
+      .attr("markerWidth", 10)
+      .attr("markerHeight", 10)
       .attr("orient", "auto")
+      .attr("markerUnits", "userSpaceOnUse")
       .append("path")
       .attr("d", "M0,-5L10,0L0,5")
       .attr("fill", "#64748b");
 
-    // Define Purple Arrowhead for Two-Way (X) connections
-    svg.append("defs").append("marker")
-      .attr("id", "arrowhead-circle-mutual")
+    // Mutual End Arrow (Purple)
+    defs.append("marker")
+      .attr("id", "arrowhead-end-purple")
       .attr("viewBox", "0 -5 10 10")
-      .attr("refX", refX)
+      .attr("refX", refXEnd)
       .attr("refY", 0)
-      .attr("markerWidth", 8)
-      .attr("markerHeight", 8)
+      .attr("markerWidth", 10)
+      .attr("markerHeight", 10)
       .attr("orient", "auto")
+      .attr("markerUnits", "userSpaceOnUse")
       .append("path")
       .attr("d", "M0,-5L10,0L0,5")
+      .attr("fill", "#8b5cf6");
+
+    // Mutual Start Arrow (Purple) - Points "Back" relative to tangent
+    // Note: orient="auto" aligns X-axis with tangent A->B.
+    // We define arrow pointing LEFT (<) in marker space.
+    defs.append("marker")
+      .attr("id", "arrowhead-start-purple")
+      .attr("viewBox", "0 -5 10 10")
+      .attr("refX", refXStart)
+      .attr("refY", 0)
+      .attr("markerWidth", 10)
+      .attr("markerHeight", 10)
+      .attr("orient", "auto")
+      .attr("markerUnits", "userSpaceOnUse")
+      .append("path")
+      .attr("d", "M10,-5L0,0L10,5") // Points Left
       .attr("fill", "#8b5cf6");
 
     // Create Nodes in a Circle
@@ -82,39 +112,51 @@ const InterrelationshipGraph: React.FC<Props> = ({ result, factors }) => {
         };
     });
 
-    // Create Links from Initial Reachability Matrix (All Direct Connections)
+    // Process Links - Deduplicate Mutuals
     const links: any[] = [];
+    const processedMutuals = new Set<string>();
+
     for(let i=0; i<initialReachabilityMatrix.length; i++) {
         for(let j=0; j<initialReachabilityMatrix.length; j++) {
             if(initialReachabilityMatrix[i][j] === 1 && i !== j) {
-                // Check if it's a two-way (X) or one-way relationship for styling
                 const isMutual = initialReachabilityMatrix[j][i] === 1;
-                links.push({ 
-                    source: nodes[i], 
-                    target: nodes[j],
-                    type: isMutual ? 'mutual' : 'direct' 
-                });
+                
+                if (isMutual) {
+                    // Unique key for the pair to avoid adding A-B and B-A separately
+                    const key = [Math.min(i, j), Math.max(i, j)].join('-');
+                    if (!processedMutuals.has(key)) {
+                        links.push({ 
+                            source: nodes[i], 
+                            target: nodes[j],
+                            type: 'mutual' 
+                        });
+                        processedMutuals.add(key);
+                    }
+                } else {
+                    links.push({ 
+                        source: nodes[i], 
+                        target: nodes[j],
+                        type: 'direct' 
+                    });
+                }
             }
         }
     }
 
-    // Draw Links (Curved)
+    // Draw Links
     svg.selectAll(".link")
         .data(links)
         .enter()
         .append("path")
         .attr("d", (d: any) => {
-            const dx = d.target.x - d.source.x;
-            const dy = d.target.y - d.source.y;
-            // Curve calculation: '1' sweep flag ensures curves always go one way relative to direction.
-            // This naturally separates A->B and B->A into two visible paths.
-            const dr = Math.sqrt(dx * dx + dy * dy) * 1.3; 
-            return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
+            // Straight line for everything
+            return `M${d.source.x},${d.source.y}L${d.target.x},${d.target.y}`;
         })
         .attr("fill", "none")
-        .attr("stroke", (d:any) => d.type === 'mutual' ? "#8b5cf6" : "#94a3b8") // Purple for X, Slate for others
-        .attr("stroke-width", (d:any) => d.type === 'mutual' ? 2 : 1.5)
-        .attr("marker-end", (d:any) => d.type === 'mutual' ? "url(#arrowhead-circle-mutual)" : "url(#arrowhead-circle)")
+        .attr("stroke", (d:any) => d.type === 'mutual' ? "#8b5cf6" : "#94a3b8")
+        .attr("stroke-width", (d:any) => d.type === 'mutual' ? 2.5 : 1.5)
+        .attr("marker-end", (d:any) => d.type === 'mutual' ? "url(#arrowhead-end-purple)" : "url(#arrowhead-end-grey)")
+        .attr("marker-start", (d:any) => d.type === 'mutual' ? "url(#arrowhead-start-purple)" : null)
         .attr("opacity", (d:any) => d.type === 'mutual' ? 1 : 0.6);
 
     // Draw Nodes
@@ -148,16 +190,21 @@ const InterrelationshipGraph: React.FC<Props> = ({ result, factors }) => {
   return (
     <div ref={containerRef} className="w-full bg-white rounded-xl border border-slate-200 shadow-inner overflow-hidden">
         <svg id="interrelationship-graph-svg" ref={svgRef} className="block mx-auto"></svg>
-        <div className="p-4 text-center text-sm text-slate-500">
+        <div className="p-4 text-center text-sm text-slate-500 font-sans">
             Interrelationships between factors (Digraph). Nodes colored by category.
             <div className="flex justify-center gap-6 mt-2 text-xs font-medium">
                 <span className="flex items-center gap-2">
-                    <span className="w-6 h-0.5 bg-slate-400"></span> 
-                    One-way Arrow (V/A)
+                    <span className="w-6 h-0.5 bg-slate-400 relative">
+                        <span className="absolute right-0 -top-1 border-l-4 border-l-slate-400 border-t-4 border-t-transparent border-b-4 border-b-transparent"></span>
+                    </span> 
+                    One-way (Direct)
                 </span>
                 <span className="flex items-center gap-2">
-                    <span className="w-6 h-0.5 bg-purple-500"></span> 
-                    Two-way Arrow (X)
+                    <span className="w-6 h-0.5 bg-purple-500 relative">
+                        <span className="absolute -left-1 -top-1 border-r-4 border-r-purple-500 border-t-4 border-t-transparent border-b-4 border-b-transparent"></span>
+                        <span className="absolute -right-1 -top-1 border-l-4 border-l-purple-500 border-t-4 border-t-transparent border-b-4 border-b-transparent"></span>
+                    </span> 
+                    Two-way (Mutual)
                 </span>
             </div>
         </div>

@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { ISMElement } from '../types';
-import { Tag, Plus, Trash2, Edit2, Save, X, Upload, FileJson, FileText, Trash, Download, FileDown } from 'lucide-react';
+import { Tag, Plus, Trash2, Edit2, Save, X, Upload, FileJson, FileText, Trash, FileDown } from 'lucide-react';
 
 interface Props {
   factors: ISMElement[];
@@ -420,7 +420,7 @@ const FactorInput: React.FC<Props> = ({ factors, setFactors, onNext }) => {
              return (
               <div key={factor.id} className="flex items-center justify-between p-3 bg-white hover:bg-slate-50 rounded-lg border border-slate-200 shadow-sm transition-colors group">
                 <div className="flex items-center gap-3 overflow-hidden flex-1">
-                  <span className={`flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full text-xs font-mono font-bold border ${catColor}`}>
+                  <span className={`flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full text-xs font-bold border ${catColor}`}>
                     {factor.name}
                   </span>
                   <div className="min-w-0 flex-1">
