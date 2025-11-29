@@ -1,4 +1,3 @@
-// components/AnalysisTable.tsx
 
 import React, { useMemo } from 'react';
 import { ISMElement, ISMResult } from '../types';
@@ -55,8 +54,7 @@ const AnalysisTable: React.FC<Props> = ({ factors, result }) => {
       <table className="w-full border-collapse text-sm text-left">
         <thead className="bg-slate-50 text-slate-700 font-semibold">
           <tr>
-            {/* Adjusted widths: Removed fixed w-20 to allow more flexible sizing for Factor and Sets */}
-            <th className="p-3 border border-slate-200 max-w-[150px]">Factor</th>
+            <th className="p-3 border border-slate-200 w-20">Factor</th>
             <th className="p-3 border border-slate-200">Reachability Set</th>
             <th className="p-3 border border-slate-200">Antecedent Set</th>
             <th className="p-3 border border-slate-200">Intersection</th>
@@ -66,12 +64,10 @@ const AnalysisTable: React.FC<Props> = ({ factors, result }) => {
         <tbody className="bg-white">
           {tableData.map((row) => (
             <tr key={row.id} className="hover:bg-slate-50 transition-colors">
-              {/* Added max-w-xs to Factor name cell to constrain its width for better balance */}
-              <td className="p-3 border border-slate-200 font-semibold text-slate-900 max-w-xs">{row.name}</td>
-              {/* Removed max-w-xs from set columns to allow them to fill space */}
-              <td className="p-3 border border-slate-200 text-slate-600 break-words">{row.reachability}</td>
-              <td className="p-3 border border-slate-200 text-slate-600 break-words">{row.antecedent}</td>
-              <td className="p-3 border border-slate-200 text-slate-600 break-words">{row.intersection}</td>
+              <td className="p-3 border border-slate-200 font-semibold text-slate-900">{row.name}</td>
+              <td className="p-3 border border-slate-200 text-slate-600 break-words max-w-xs">{row.reachability}</td>
+              <td className="p-3 border border-slate-200 text-slate-600 break-words max-w-xs">{row.antecedent}</td>
+              <td className="p-3 border border-slate-200 text-slate-600 break-words max-w-xs">{row.intersection}</td>
               <td className="p-3 border border-slate-200 text-center font-bold text-indigo-600">{row.level}</td>
             </tr>
           ))}

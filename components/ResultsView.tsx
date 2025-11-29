@@ -1,4 +1,3 @@
-// components/ResultsView.tsx
 
 import React, { useState, useRef } from 'react';
 import { ISMResult, ISMElement } from '../types';
@@ -103,7 +102,19 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
 
   const handleExportExcel = () => {
     let excelContent = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
-    excelContent += '<head></head><body>';
+    excelContent += '<head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets>';
+    
+    const sheets = [
+        { name: 'Level Partition', id: 'sheet1', content: generateAnalysisTableHTML() },
+        { name: 'Final Matrix', id: 'sheet2', content: generateMatrixHTML(result.finalReachabilityMatrix, result.initialReachabilityMatrix, true) },
+        { name: 'Initial Matrix', id: 'sheet3', content: generateMatrixHTML(result.initialReachabilityMatrix, null, false) }
+    ];
+
+    sheets.forEach(sheet => {
+        excelContent += `<x:ExcelWorksheet><x:Name>${sheet.name}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet>`;
+    });
+
+    excelContent += '</x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body>';
 
     sheets.forEach(sheet => {
         excelContent += sheet.content;
@@ -192,14 +203,12 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
           <div className="flex items-center gap-1.5"><span className="w-4 h-4 flex items-center justify-center bg-white text-slate-300 border border-slate-200 rounded text-[10px]">0</span> No Relation</div>
       </div>
       <div className="overflow-x-auto pb-4">
-        {/* Removed table-fixed */}
-        <table className="w-full border-collapse text-sm border border-slate-300">
+        <table className="w-full border-collapse text-sm border border-slate-300 table-fixed">
           <thead>
             <tr>
-              {/* Adjusted width to w-1/4 for the factor description column */}
-              <th className="p-2 border border-slate-300 bg-slate-800 text-white font-mono text-xs w-1/4">i \ j</th>
+              <th className="p-2 border border-slate-300 bg-slate-800 text-white font-mono text-xs w-[250px]">i \ j</th>
               {factors.map((f, i) => (
-                <th key={i} className="p-2 border border-slate-300 bg-slate-100 text-slate-800 w-1/12 text-center text-xs font-bold font-mono">
+                <th key={i} className="p-2 border border-slate-300 bg-slate-100 text-slate-800 w-12 text-center text-xs font-bold font-mono">
                     {/* Columns: Short ID Only, Horizontal */}
                     {f.name}
                 </th>
@@ -215,8 +224,7 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
                   <span className="font-normal text-slate-600">{factors[i].description}</span>
                 </td>
                 {row.map((val, j) => (
-                  {/* Applied w-1/12 to data cells for consistency */}
-                  <td key={j} className={`p-2 border border-slate-300 text-center w-1/12 ${val === 1 ? 'text-blue-900 bg-blue-50 font-bold' : 'text-slate-300'}`}>
+                  <td key={j} className={`p-2 border border-slate-300 text-center ${val === 1 ? 'text-blue-900 bg-blue-50 font-bold' : 'text-slate-300'}`}>
                     {val}
                   </td>
                 ))}
@@ -246,20 +254,18 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
         </div>
 
         <div className="overflow-x-auto pb-4">
-          {/* Removed table-fixed */}
-          <table className="w-full border-collapse text-sm border border-slate-300">
+          <table className="w-full border-collapse text-sm border border-slate-300 table-fixed">
             <thead>
               <tr>
-                {/* Adjusted width to w-1/4 for the factor description column */}
-                <th className="p-2 border border-slate-300 bg-slate-800 text-white font-mono text-xs w-1/4">i \ j</th>
+                <th className="p-2 border border-slate-300 bg-slate-800 text-white font-mono text-xs w-[250px]">i \ j</th>
                 {factors.map((f, i) => (
-                  <th key={i} className="p-2 border border-slate-300 bg-slate-100 text-slate-800 w-1/12 text-center text-xs font-bold font-mono">
+                  <th key={i} className="p-2 border border-slate-300 bg-slate-100 text-slate-800 w-12 text-center text-xs font-bold font-mono">
                      {/* Columns: Short ID Only, Horizontal */}
                      {f.name}
                   </th>
                 ))}
-                {/* Adjusted Driving Power Header width to w-20 */}
-                <th className="p-2 border border-slate-300 bg-indigo-100 text-indigo-900 font-bold whitespace-nowrap text-center text-xs uppercase tracking-wider w-20">
+                {/* Fixed Driving Power Header: Expanded width and auto sizing to prevent clipping */}
+                <th className="p-2 border border-slate-300 bg-indigo-100 text-indigo-900 font-bold whitespace-nowrap text-center text-xs uppercase tracking-wider w-auto px-4 min-w-[60px]">
                     Driving Power
                 </th>
               </tr>
@@ -286,17 +292,15 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
                              cellClass = "text-amber-700 font-bold bg-amber-50";
                          }
                      } else displayVal = "0";
-                     {/* Applied w-1/12 to data cells for consistency */}
-                     return <td key={j} className={`p-2 border border-slate-300 text-center w-1/12 ${cellClass}`}>{displayVal}</td>;
+                     return <td key={j} className={`p-2 border border-slate-300 text-center ${cellClass}`}>{displayVal}</td>;
                    })}
-                   {/* Applied w-20 to Driving Power data cell for consistency */}
-                   <td className="p-2 border border-slate-300 bg-indigo-50 text-indigo-800 font-bold text-center w-20">{drivingPowers[i]}</td>
+                   <td className="p-2 border border-slate-300 bg-indigo-50 text-indigo-800 font-bold text-center">{drivingPowers[i]}</td>
                 </tr>
               ))}
               <tr className="font-bold">
                   <td className="p-2 border border-slate-300 bg-teal-100 text-teal-900 font-bold text-center whitespace-nowrap text-xs uppercase tracking-wider">Dependence Power</td>
-                  {dependencePowers.map((val, j) => <td key={j} className="p-2 border border-slate-300 bg-teal-50 text-teal-800 text-center w-1/12">{val}</td>)}
-                  <td className="p-2 border border-slate-300 bg-slate-200 w-20"></td>
+                  {dependencePowers.map((val, j) => <td key={j} className="p-2 border border-slate-300 bg-teal-50 text-teal-800 text-center">{val}</td>)}
+                  <td className="p-2 border border-slate-300 bg-slate-200"></td>
               </tr>
             </tbody>
           </table>
