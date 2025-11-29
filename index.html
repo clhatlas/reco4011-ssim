@@ -5,10 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ISM Tool - SSIM & MICMAC Analysis (Trial Version)</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
+              mono: ['Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', 'monospace'],
+            },
+          },
+        },
+      }
+    </script>
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
       body {
-        font-family: 'Inter', sans-serif;
+        font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
         background-color: #f8fafc; /* Slate 50 */
         color: #1e293b; /* Slate 800 */
       }

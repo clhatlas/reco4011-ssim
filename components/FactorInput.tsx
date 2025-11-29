@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { ISMElement } from '../types';
-import { Tag, Plus, Trash2, Edit2, Save, X } from 'lucide-react';
+import { Tag, Plus, Trash2, Edit2, Save, X, Upload, FileJson, FileText, Trash } from 'lucide-react';
 
 interface Props {
   factors: ISMElement[];
@@ -71,6 +71,8 @@ const FactorInput: React.FC<Props> = ({ factors, setFactors, onNext }) => {
   const [isAdding, setIsAdding] = useState(false);
   const [newFactor, setNewFactor] = useState({ name: '', description: '', category: 'Management' });
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   // Compute unique categories for suggestion list
   const availableCategories = useMemo(() => {
     const existing = new Set(factors.map(f => f.category || '').filter(Boolean));
@@ -86,7 +88,7 @@ const FactorInput: React.FC<Props> = ({ factors, setFactors, onNext }) => {
     }
     
     const factor: ISMElement = {
-      id: crypto.randomUUID(),
+      id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2),
       name: newFactor.name.trim(),
       description: newFactor.description.trim(),
       category: newFactor.category
@@ -104,6 +106,13 @@ const FactorInput: React.FC<Props> = ({ factors, setFactors, onNext }) => {
     }
   };
 
+  // Clear All
+  const handleClearAll = () => {
+    if (confirm("Are you sure you want to delete ALL factors? This cannot be undone.")) {
+      setFactors([]);
+    }
+  };
+
   // Start Edit
   const startEdit = (factor: ISMElement) => {
     setEditingId(factor.id);
@@ -117,19 +126,168 @@ const FactorInput: React.FC<Props> = ({ factors, setFactors, onNext }) => {
     setEditValues({});
   };
 
+  // CSV Helper
+  const parseCSV = (text: string): ISMElement[] => {
+    const lines = text.trim().split(/\r?\n/);
+    if (lines.length < 2) return [];
+    
+    // Normalize headers
+    const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, '').toLowerCase());
+    
+    const parsedFactors: ISMElement[] = [];
+    
+    for (let i = 1; i < lines.length; i++) {
+        const line = lines[i];
+        if (!line.trim()) continue;
+        
+        // Split by comma, handling quotes roughly
+        const values = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(v => v.trim().replace(/^"|"$/g, '').replace(/""/g, '"'));
+        
+        const factor: any = { 
+            id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2) 
+        };
+        
+        headers.forEach((h, idx) => {
+            if (values[idx] !== undefined) {
+                if (h === 'id') factor.id = values[idx];
+                else if (h === 'name' || h === 'factor') factor.name = values[idx];
+                else if (h === 'description' || h === 'desc') factor.description = values[idx];
+                else if (h === 'category' || h === 'cat') factor.category = values[idx];
+            }
+        });
+
+        if (factor.name) {
+            parsedFactors.push(factor as ISMElement);
+        }
+    }
+    return parsedFactors;
+  };
+
+  // Import Handler
+  const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = (event) => {
+        const text = event.target?.result as string;
+        try {
+            if (file.name.toLowerCase().endsWith('.csv')) {
+                const parsed = parseCSV(text);
+                if (parsed.length > 0) {
+                    setFactors(parsed);
+                    alert(`Successfully imported ${parsed.length} factors.`);
+                } else {
+                    alert("No valid factors found in CSV.");
+                }
+            } else {
+                // Assume JSON
+                const parsed = JSON.parse(text);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                     setFactors(parsed);
+                     alert(`Successfully imported ${parsed.length} factors.`);
+                } else {
+                     alert("Invalid JSON format. Expected an array of factors.");
+                }
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Failed to parse file. Please check the format.");
+        }
+        if (fileInputRef.current) fileInputRef.current.value = "";
+    };
+    reader.readAsText(file);
+  };
+
+  const triggerImport = () => fileInputRef.current?.click();
+
+  // Export Logic
+  const handleExportJSON = () => {
+    const dataStr = JSON.stringify(factors, null, 2);
+    const blob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Factors_${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExportCSV = () => {
+    const headers = ["id", "name", "description", "category"];
+    const rows = factors.map(f => [
+        `"${f.id}"`,
+        `"${f.name.replace(/"/g, '""')}"`,
+        `"${(f.description || '').replace(/"/g, '""')}"`,
+        `"${(f.category || '').replace(/"/g, '""')}"`
+    ].join(","));
+    const csvContent = [headers.join(","), ...rows].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Factors_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
         <div>
           <h2 className="text-2xl font-bold text-slate-900">Model Factors</h2>
           <p className="text-slate-500">Manage the critical factors identified for the sustainability model.</p>
         </div>
-        <button 
-           onClick={() => setIsAdding(!isAdding)}
-           className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${isAdding ? 'bg-slate-100 text-slate-700' : 'bg-emerald-600 text-white hover:bg-emerald-700'}`}
-        >
-          {isAdding ? <><X className="w-4 h-4"/> Cancel</> : <><Plus className="w-4 h-4"/> Add Factor</>}
-        </button>
+        
+        <div className="flex flex-wrap items-center gap-2">
+           <input type="file" ref={fileInputRef} className="hidden" accept=".json,.csv" onChange={handleImport} />
+           
+           <button 
+             onClick={triggerImport}
+             className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors text-sm font-medium"
+             title="Import from JSON or CSV"
+           >
+             <Upload className="w-4 h-4" /> Import
+           </button>
+           
+           <div className="flex bg-white border border-slate-300 rounded-lg overflow-hidden divide-x divide-slate-200">
+             <button 
+                onClick={handleExportJSON}
+                className="flex items-center gap-2 px-3 py-2 bg-white text-slate-700 hover:bg-slate-50 transition-colors text-sm font-medium"
+                title="Export as JSON"
+             >
+                <FileJson className="w-4 h-4" /> JSON
+             </button>
+             <button 
+                onClick={handleExportCSV}
+                className="flex items-center gap-2 px-3 py-2 bg-white text-slate-700 hover:bg-slate-50 transition-colors text-sm font-medium"
+                title="Export as CSV"
+             >
+                <FileText className="w-4 h-4" /> CSV
+             </button>
+           </div>
+
+           <button 
+             onClick={handleClearAll}
+             className="flex items-center gap-2 px-3 py-2 bg-white border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-colors text-sm font-medium"
+             title="Remove All Factors"
+           >
+             <Trash className="w-4 h-4" /> Clear
+           </button>
+
+           <div className="w-px h-6 bg-slate-300 mx-1 hidden md:block"></div>
+
+           <button 
+              onClick={() => setIsAdding(!isAdding)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${isAdding ? 'bg-slate-100 text-slate-700' : 'bg-emerald-600 text-white hover:bg-emerald-700'}`}
+           >
+             {isAdding ? <><X className="w-4 h-4"/> Cancel</> : <><Plus className="w-4 h-4"/> Add Factor</>}
+           </button>
+        </div>
       </div>
 
       {isAdding && (
@@ -181,6 +339,12 @@ const FactorInput: React.FC<Props> = ({ factors, setFactors, onNext }) => {
 
       <div className="bg-white rounded-xl p-6 border border-emerald-100 shadow-xl shadow-emerald-500/5">
         <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+          {factors.length === 0 && (
+             <div className="text-center py-10 text-slate-400">
+                 <p>No factors defined yet.</p>
+                 <p className="text-sm">Add a factor manually or import a dataset.</p>
+             </div>
+          )}
           {factors.map((factor) => {
              const isEditing = editingId === factor.id;
              const catColor = getCategoryColorClasses(factor.category);
@@ -279,7 +443,8 @@ const FactorInput: React.FC<Props> = ({ factors, setFactors, onNext }) => {
       <div className="flex justify-end pt-4">
         <button
           onClick={onNext}
-          className="px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg shadow-lg shadow-emerald-500/20 transition-all transform hover:scale-[1.02]"
+          disabled={factors.length < 2}
+          className={`px-8 py-3 font-bold rounded-lg shadow-lg transition-all transform ${factors.length < 2 ? 'bg-slate-300 text-slate-500 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20 hover:scale-[1.02]'}`}
         >
           Next: Build SSIM Matrix
         </button>

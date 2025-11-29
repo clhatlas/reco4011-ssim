@@ -18,7 +18,7 @@ const HierarchyGraph: React.FC<Props> = ({ result, factors }) => {
     // Clear previous
     d3.select(svgRef.current).selectAll("*").remove();
 
-    const { levels, canonicalMatrix } = result;
+    const { levels, initialReachabilityMatrix } = result;
     const width = containerRef.current.clientWidth || 800;
     const levelHeight = 140; // Spacing
     const height = Math.max(600, levels.length * levelHeight + 100);
@@ -63,11 +63,14 @@ const HierarchyGraph: React.FC<Props> = ({ result, factors }) => {
         });
     });
 
-    // Prepare Link Data from Canonical Matrix
+    // Prepare Link Data from Initial Reachability Matrix (User Input)
+    // instead of Canonical Matrix (Transitive Reduction) to show ALL connections.
     const links: any[] = [];
-    for(let i=0; i<canonicalMatrix.length; i++) {
-        for(let j=0; j<canonicalMatrix.length; j++) {
-            if(canonicalMatrix[i][j] === 1 && i !== j) {
+    const matrix = initialReachabilityMatrix;
+    
+    for(let i=0; i<matrix.length; i++) {
+        for(let j=0; j<matrix.length; j++) {
+            if(matrix[i][j] === 1 && i !== j) {
                 const source = nodes.find(n => n.id === i);
                 const target = nodes.find(n => n.id === j);
                 if (source && target) {

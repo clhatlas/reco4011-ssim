@@ -8,9 +8,20 @@ interface Props {
   factors: ISMElement[];
 }
 
-interface MicmacDataPoint extends ISMElement {
+interface MicmacDataPoint {
+  id: string;
+  name: string;
+  description?: string;
+  category?: string;
   drivingPower: number;
   dependencePower: number;
+}
+
+interface GroupedPoint {
+  drivingPower: number;
+  dependencePower: number;
+  factors: MicmacDataPoint[];
+  label: string;
 }
 
 const MicmacAnalysis: React.FC<Props> = ({ result, factors }) => {
@@ -18,7 +29,7 @@ const MicmacAnalysis: React.FC<Props> = ({ result, factors }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   // 1. Calculate Powers
-  const data: MicmacDataPoint[] = useMemo(() => {
+  const rawData: MicmacDataPoint[] = useMemo(() => {
     const size = factors.length;
     const frm = result.finalReachabilityMatrix;
     return factors.map((f, i) => {
@@ -34,7 +45,30 @@ const MicmacAnalysis: React.FC<Props> = ({ result, factors }) => {
     });
   }, [result, factors]);
 
-  // 2. Classify into Quadrants
+  // 2. Group Points to avoid Overlap
+  const groupedData: GroupedPoint[] = useMemo(() => {
+    const map = new Map<string, MicmacDataPoint[]>();
+    
+    rawData.forEach(p => {
+        const key = `${p.dependencePower}-${p.drivingPower}`;
+        if (!map.has(key)) {
+            map.set(key, []);
+        }
+        map.get(key)!.push(p);
+    });
+
+    return Array.from(map.entries()).map(([key, points]) => {
+        const [dep, drv] = key.split('-').map(Number);
+        return {
+            dependencePower: dep,
+            drivingPower: drv,
+            factors: points,
+            label: points.map(p => p.name).join(', ')
+        };
+    });
+  }, [rawData]);
+
+  // 3. Classify into Quadrants (based on raw data for the lists)
   const splitPoint = factors.length / 2; // Standard split at N/2
   
   const quadrants = useMemo(() => {
@@ -45,13 +79,7 @@ const MicmacAnalysis: React.FC<Props> = ({ result, factors }) => {
       driver: [] as MicmacDataPoint[],
     };
 
-    data.forEach(p => {
-        // Driver: High Driving, Low Dependence
-        // Linkage: High Driving, High Dependence
-        // Autonomous: Low Driving, Low Dependence
-        // Dependent: Low Driving, High Dependence
-        
-        // Note: Using > vs <= logic based on standard MICMAC charts
+    rawData.forEach(p => {
         if (p.drivingPower <= splitPoint && p.dependencePower <= splitPoint) {
             q.autonomous.push(p);
         } else if (p.drivingPower <= splitPoint && p.dependencePower > splitPoint) {
@@ -63,9 +91,9 @@ const MicmacAnalysis: React.FC<Props> = ({ result, factors }) => {
         }
     });
     return q;
-  }, [data, splitPoint]);
+  }, [rawData, splitPoint]);
 
-  // 3. Render Chart with D3
+  // 4. Render Chart with D3
   useEffect(() => {
     if (!svgRef.current || !containerRef.current) return;
 
@@ -151,7 +179,7 @@ const MicmacAnalysis: React.FC<Props> = ({ result, factors }) => {
       .attr("y2", innerHeight)
       .attr("stroke", "#1e293b")
       .attr("stroke-width", 2)
-      .attr("stroke-dasharray", "4"); // Solid or Dashed? Image is solid thick line
+      .attr("stroke-dasharray", "4"); 
 
     g.append("line")
       .attr("x1", 0)
@@ -208,61 +236,64 @@ const MicmacAnalysis: React.FC<Props> = ({ result, factors }) => {
        .text("II. Dependent");
 
 
-    // Plot Points
-    // Add jitter if points overlap perfectly? For simple grid, overlap is common.
-    // We will group by coordinate to handle overlaps visually or just render them.
-    // For now, render simple circles.
-    
+    // Plot Points using GROUPED Data
     const tooltip = d3.select(containerRef.current)
       .append("div")
       .style("position", "absolute")
       .style("visibility", "hidden")
-      .style("background", "rgba(0,0,0,0.8)")
+      .style("background", "rgba(0,0,0,0.9)")
       .style("color", "white")
-      .style("padding", "5px 10px")
-      .style("border-radius", "4px")
+      .style("padding", "8px 12px")
+      .style("border-radius", "6px")
       .style("font-size", "12px")
       .style("pointer-events", "none")
-      .style("z-index", "10");
+      .style("z-index", "10")
+      .style("max-width", "250px")
+      .style("box-shadow", "0 4px 6px rgba(0,0,0,0.3)");
 
-    g.selectAll(".dot")
-      .data(data)
+    g.selectAll(".dot-group")
+      .data(groupedData)
       .enter()
       .append("circle")
-      .attr("class", "dot")
+      .attr("class", "dot-group")
       .attr("cx", d => xScale(d.dependencePower))
       .attr("cy", d => yScale(d.drivingPower))
-      .attr("r", 6)
-      .attr("fill", d => getCategoryColorHex(d.category))
+      .attr("r", d => d.factors.length > 1 ? 8 : 6) // Slightly larger for groups
+      .attr("fill", d => d.factors.length > 1 ? "#334155" : getCategoryColorHex(d.factors[0].category)) // Dark slate for groups, category color for single
       .attr("stroke", "#fff")
       .attr("stroke-width", 2)
       .attr("cursor", "pointer")
       .on("mouseover", function(event, d) {
-          d3.select(this).attr("r", 9);
+          d3.select(this).attr("r", d.factors.length > 1 ? 10 : 8);
+          
+          let tooltipHtml = `<strong>Dr: ${d.drivingPower}, Dep: ${d.dependencePower}</strong><hr style="margin:4px 0; border-color:#555"/>`;
+          d.factors.forEach(f => {
+              tooltipHtml += `<div style="margin-bottom:4px"><strong style="color:#6ee7b7">${f.name}</strong>: ${f.description}</div>`;
+          });
+
           tooltip
             .style("visibility", "visible")
-            .html(`<strong>${d.name}</strong><br/>Dr: ${d.drivingPower}, Dep: ${d.dependencePower}<br/>${d.description}`);
+            .html(tooltipHtml);
       })
       .on("mousemove", function(event) {
-          // Adjust for container offset
           const [mx, my] = d3.pointer(event, containerRef.current);
           tooltip
-            .style("top", (my - 40) + "px")
-            .style("left", (mx) + "px");
+            .style("top", (my - 10) + "px")
+            .style("left", (mx + 15) + "px");
       })
-      .on("mouseout", function() {
-          d3.select(this).attr("r", 6);
+      .on("mouseout", function(event, d) {
+          d3.select(this).attr("r", d.factors.length > 1 ? 8 : 6);
           tooltip.style("visibility", "hidden");
       });
 
     // Labels next to points
     g.selectAll(".label")
-      .data(data)
+      .data(groupedData)
       .enter()
       .append("text")
-      .attr("x", d => xScale(d.dependencePower) + 8)
+      .attr("x", d => xScale(d.dependencePower) + (d.factors.length > 1 ? 10 : 8))
       .attr("y", d => yScale(d.drivingPower) + 4)
-      .text(d => d.name)
+      .text(d => d.label)
       .attr("font-size", "10px")
       .attr("font-weight", "bold")
       .attr("fill", "#334155");
@@ -271,7 +302,7 @@ const MicmacAnalysis: React.FC<Props> = ({ result, factors }) => {
         tooltip.remove();
     };
 
-  }, [data, factors, splitPoint]);
+  }, [groupedData, factors, splitPoint]);
 
   const renderQuadrantList = (title: string, items: MicmacDataPoint[], colorClass: string, desc: string) => (
     <div className={`p-4 rounded-lg border ${colorClass} bg-white shadow-sm flex flex-col h-full`}>
