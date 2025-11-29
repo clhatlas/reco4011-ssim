@@ -95,7 +95,7 @@ const App: React.FC = () => {
              <div className="bg-gradient-to-r from-emerald-50 to-white p-6 rounded-xl border border-emerald-100 shadow-sm">
                 <h2 className="text-lg font-bold text-emerald-900 mb-2">Welcome to ISM Tool</h2>
                 <p className="text-slate-700 leading-relaxed">
-                  This intelligent tool helps you analyze complex systems. Start by <strong>filling in the factors</strong> below. 
+                  This intelligent tool helps you analyze factors and barriers to form SSIM and MICMAC in your Interpretive Structural Modelling study. Start by <strong>filling in the factors</strong> below. 
                   Next, define the <strong>SSIM Matrix</strong> to map relationships. The app will then generate the 
                   <strong> Hierarchy Model</strong>, visualize <strong>Interrelationships</strong>, calculate the <strong>Transitivity Table</strong>, 
                   and perform <strong>MICMAC analysis</strong>.
