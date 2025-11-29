@@ -6,8 +6,8 @@ import ResultsView from './components/ResultsView';
 import { runISMAnalysis } from './services/ismLogic';
 import { HardHat } from 'lucide-react';
 
-// Fixed 11 factors based on the Sustainability Barriers input
-const FIXED_FACTORS: ISMElement[] = [
+// Default factors based on the Sustainability Barriers input
+const DEFAULT_FACTORS: ISMElement[] = [
   { id: 'F1', name: 'F1', description: 'Lack of commitment from top management', category: 'Management' },
   { id: 'F2', name: 'F2', description: 'Financial Constraints', category: 'Cost' },
   { id: 'F3', name: 'F3', description: 'Organizational culture inhibitive to sustainability/CSR', category: 'Organization' },
@@ -24,10 +24,10 @@ const FIXED_FACTORS: ISMElement[] = [
 const FIXED_TOPIC = "Barriers to Sustainability Implementation";
 
 const App: React.FC = () => {
-  // Initialize directly to Factor Definition step with fixed data
+  // Initialize directly to Factor Definition step with default data
   const [step, setStep] = useState<AppStep>(AppStep.DEFINE_FACTORS);
   const [topic] = useState(FIXED_TOPIC);
-  const [factors] = useState<ISMElement[]>(FIXED_FACTORS);
+  const [factors, setFactors] = useState<ISMElement[]>(DEFAULT_FACTORS);
   const [ssim, setSsim] = useState<SSIMData>({});
   const [result, setResult] = useState<ISMResult | null>(null);
 
@@ -36,6 +36,10 @@ const App: React.FC = () => {
   }, [step]);
 
   const goToSSIM = () => {
+    if (factors.length < 2) {
+      alert("Please define at least 2 factors to proceed.");
+      return;
+    }
     setStep(AppStep.FILL_SSIM);
   };
 
@@ -47,7 +51,7 @@ const App: React.FC = () => {
   };
 
   const resetAnalysis = () => {
-    if(window.confirm("This will clear the current analysis and SSIM data. Continue?")) {
+    if(window.confirm("This will clear the current analysis and SSIM data. The factors will remain. Continue?")) {
       setSsim({});
       setResult(null);
       setStep(AppStep.DEFINE_FACTORS);
@@ -93,8 +97,7 @@ const App: React.FC = () => {
 
              <FactorInput 
                 factors={factors} 
-                // Pass dummy setFactors as it's read-only now
-                setFactors={() => {}} 
+                setFactors={setFactors} 
                 topic={topic} 
                 onNext={goToSSIM} 
               />
