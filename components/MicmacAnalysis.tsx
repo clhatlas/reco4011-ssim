@@ -249,7 +249,7 @@ const MicmacAnalysis: React.FC<Props> = ({ result, factors }) => {
        .attr("dominant-baseline", "hanging")
        .attr("font-weight", "bold")
        .attr("font-family", "Helvetica Neue, Helvetica, Arial, sans-serif")
-       .attr("fill", "#be123c") // Rose-700
+       .attr("fill", "#dc2626") // Red-600
        .style("font-size", "14px")
        .text("IV. Driver (Independent)");
 

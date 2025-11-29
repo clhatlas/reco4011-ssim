@@ -16,6 +16,7 @@ interface Props {
 }
 
 const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
+  // Default to Initial Reachability Matrix ('irm')
   const [activeTab, setActiveTab] = useState<'hierarchy' | 'digraph' | 'micmac' | 'analysis' | 'irm' | 'frm'>('irm');
   const exportRef = useRef<HTMLDivElement>(null);
 
@@ -104,7 +105,7 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
     excelContent += '<head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets>';
     
     const sheets = [
-        { name: 'Level Partitioning', id: 'sheet1', content: generateAnalysisTableHTML() },
+        { name: 'Level Partition', id: 'sheet1', content: generateAnalysisTableHTML() },
         { name: 'Final Matrix', id: 'sheet2', content: generateMatrixHTML(result.finalReachabilityMatrix, result.initialReachabilityMatrix, true) },
         { name: 'Initial Matrix', id: 'sheet3', content: generateMatrixHTML(result.initialReachabilityMatrix, null, false) }
     ];
@@ -334,7 +335,7 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
             {[
                 { id: 'irm', label: 'Initial' },
                 { id: 'frm', label: 'Final' },
-                { id: 'analysis', label: 'Sets' },
+                { id: 'analysis', label: 'Partition' }, // Changed from Sets
                 { id: 'digraph', label: 'Digraph' },
                 { id: 'hierarchy', label: 'Hierarchy' },
                 { id: 'micmac', label: 'MICMAC' },
@@ -372,7 +373,7 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
         )}
         {activeTab === 'analysis' && (
             <div className="p-6">
-                <h3 className="font-bold text-slate-900 mb-4">Results of level partitions</h3>
+                <h3 className="font-bold text-slate-900 mb-4">Results of level partition</h3>
                 <AnalysisTable factors={factors} result={result} />
             </div>
         )}
