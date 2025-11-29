@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { ISMElement } from '../types';
-import { Tag, Plus, Trash2, Edit2, Save, X, Upload, FileJson, FileText, Trash } from 'lucide-react';
+import { Tag, Plus, Trash2, Edit2, Save, X, Upload, FileJson, FileText, Trash, Download, FileDown } from 'lucide-react';
 
 interface Props {
   factors: ISMElement[];
@@ -235,6 +235,23 @@ const FactorInput: React.FC<Props> = ({ factors, setFactors, onNext }) => {
     URL.revokeObjectURL(url);
   };
 
+  // Download Template
+  const handleDownloadTemplate = () => {
+    const headers = "id,name,description,category";
+    const sampleRow = "F1,Sample Factor,Description of the factor,Management";
+    const csvContent = `${headers}\n${sampleRow}`;
+    
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = "ISM_Factors_Template.csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
@@ -246,6 +263,14 @@ const FactorInput: React.FC<Props> = ({ factors, setFactors, onNext }) => {
         <div className="flex flex-wrap items-center gap-2">
            <input type="file" ref={fileInputRef} className="hidden" accept=".json,.csv" onChange={handleImport} />
            
+           <button 
+             onClick={handleDownloadTemplate}
+             className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors text-sm font-medium"
+             title="Download CSV Template"
+           >
+             <FileDown className="w-4 h-4" /> Template
+           </button>
+
            <button 
              onClick={triggerImport}
              className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors text-sm font-medium"

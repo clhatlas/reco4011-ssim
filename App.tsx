@@ -4,7 +4,7 @@ import FactorInput from './components/FactorInput';
 import SSIMGrid from './components/SSIMGrid';
 import ResultsView from './components/ResultsView';
 import { runISMAnalysis } from './services/ismLogic';
-import { HardHat } from 'lucide-react';
+import { HardHat, BookOpen, ChevronDown, ChevronUp } from 'lucide-react';
 
 // Default factors based on the Sustainability Barriers input
 const DEFAULT_FACTORS: ISMElement[] = [
@@ -30,6 +30,7 @@ const App: React.FC = () => {
   const [factors, setFactors] = useState<ISMElement[]>(DEFAULT_FACTORS);
   const [ssim, setSsim] = useState<SSIMData>({});
   const [result, setResult] = useState<ISMResult | null>(null);
+  const [isManualOpen, setIsManualOpen] = useState(true);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -91,15 +92,65 @@ const App: React.FC = () => {
         {step === AppStep.DEFINE_FACTORS && (
           <div className="space-y-6 animate-in zoom-in-95 duration-500">
              
-             {/* App Description / Instructions */}
-             <div className="bg-gradient-to-r from-emerald-50 to-white p-6 rounded-xl border border-emerald-100 shadow-sm">
-                <h2 className="text-lg font-bold text-emerald-900 mb-2">Welcome to ISM Tool</h2>
-                <p className="text-slate-700 leading-relaxed">
-                  This intelligent tool helps you analyze factors and barriers to form SSIM and MICMAC in your Interpretive Structural Modelling study. Start by <strong>filling in the factors</strong> below. 
-                  Next, define the <strong>SSIM Matrix</strong> to map relationships. The app will then generate the 
-                  <strong> Hierarchy Model</strong>, visualize <strong>Interrelationships</strong>, calculate the <strong>Transitivity Table</strong>, 
-                  and perform <strong>MICMAC analysis</strong>.
-                </p>
+             {/* User Manual / Instructions */}
+             <div className="bg-white rounded-xl border border-emerald-100 shadow-sm overflow-hidden">
+                <div 
+                    className="p-4 bg-emerald-50/50 flex items-center justify-between cursor-pointer border-b border-emerald-50 hover:bg-emerald-50 transition-colors"
+                    onClick={() => setIsManualOpen(!isManualOpen)}
+                >
+                    <div className="flex items-center gap-2 text-emerald-900 font-bold">
+                        <BookOpen className="w-5 h-5" />
+                        <h2>User Manual & Instructions</h2>
+                    </div>
+                    {isManualOpen ? <ChevronUp className="w-5 h-5 text-emerald-700" /> : <ChevronDown className="w-5 h-5 text-emerald-700" />}
+                </div>
+                
+                {isManualOpen && (
+                    <div className="p-6 space-y-6 text-slate-700 text-sm leading-relaxed">
+                        <p className="text-base">
+                            Welcome to the ISM Tool. This platform guides you through the process of Interpretive Structural Modelling (ISM) to analyze complex relationships between various factors.
+                        </p>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div className="space-y-2">
+                                <h3 className="font-bold text-emerald-800 uppercase text-xs tracking-wider">Step 1: Define Factors</h3>
+                                <p>
+                                    Input the critical factors for your study. You can add them manually, or for large datasets, use the 
+                                    <strong> Import</strong> feature.
+                                </p>
+                                <ul className="list-disc list-inside text-xs text-slate-500 space-y-1 ml-1">
+                                    <li>Use the <strong>Template</strong> button to download a formatted CSV file.</li>
+                                    <li>Fill in your factors (ID, Name, Description, Category) and upload it back using <strong>Import</strong>.</li>
+                                </ul>
+                            </div>
+
+                            <div className="space-y-2">
+                                <h3 className="font-bold text-emerald-800 uppercase text-xs tracking-wider">Step 2: Build SSIM</h3>
+                                <p>
+                                    Establish the contextual relationships between factors in the Structural Self-Interaction Matrix (SSIM).
+                                </p>
+                                <ul className="list-none text-xs text-slate-500 space-y-1">
+                                    <li><span className="font-bold text-emerald-600">V</span>: Factor <i>i</i> influences <i>j</i></li>
+                                    <li><span className="font-bold text-amber-600">A</span>: Factor <i>j</i> influences <i>i</i></li>
+                                    <li><span className="font-bold text-blue-600">X</span>: Mutual influence (<i>i</i> &harr; <i>j</i>)</li>
+                                    <li><span className="font-bold text-slate-400">O</span>: No relationship</li>
+                                </ul>
+                            </div>
+
+                            <div className="space-y-2">
+                                <h3 className="font-bold text-emerald-800 uppercase text-xs tracking-wider">Step 3: Analyze Model</h3>
+                                <p>
+                                    The tool automatically calculates the Reachability Matrix, checks for Transitivity, partitions levels, and generates:
+                                </p>
+                                <ul className="list-disc list-inside text-xs text-slate-500 space-y-1 ml-1">
+                                    <li><strong>Hierarchy Graph</strong>: A multi-level structural model.</li>
+                                    <li><strong>MICMAC Analysis</strong>: Driving vs. Dependence power quadrant chart.</li>
+                                    <li><strong>Interrelationship Digraph</strong>: Network visualization of connections.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                )}
              </div>
 
              <FactorInput 

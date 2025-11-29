@@ -19,7 +19,6 @@ const InterrelationshipGraph: React.FC<Props> = ({ result, factors }) => {
     d3.select(svgRef.current).selectAll("*").remove();
 
     // USE INITIAL REACHABILITY MATRIX to show ALL defined connections (SSIM inputs)
-    // instead of the reduced Canonical Matrix.
     const { initialReachabilityMatrix } = result;
     const width = containerRef.current.clientWidth || 800;
     const height = 600;
@@ -34,11 +33,23 @@ const InterrelationshipGraph: React.FC<Props> = ({ result, factors }) => {
       .attr("viewBox", [0, 0, width, height])
       .style("background-color", "#ffffff");
 
+    // Calculate Arrowhead Position
+    // We want the tip of the arrow to touch the outer edge of the node circle.
+    // The path goes to the center of the node.
+    // Marker Scaling: markerWidth=8, viewBox="0 0 10 10" -> Scale = 0.8
+    // Visual Distance needed = nodeRadius (24) + stroke/gap (approx 4) = 28px
+    // refX formula: TipX + (Distance / Scale)
+    // TipX is 10 (end of path in viewBox)
+    // refX = 10 + (28 / 0.8) = 10 + 35 = 45
+    const markerScale = 0.8;
+    const distance = nodeRadius + 5; 
+    const refX = 10 + (distance / markerScale);
+
     // Define Arrowhead marker
     svg.append("defs").append("marker")
       .attr("id", "arrowhead-circle")
       .attr("viewBox", "0 -5 10 10")
-      .attr("refX", nodeRadius + 12) // Adjusted to ensure arrow tip touches node edge cleanly
+      .attr("refX", refX) 
       .attr("refY", 0)
       .attr("markerWidth", 8)
       .attr("markerHeight", 8)
@@ -51,7 +62,7 @@ const InterrelationshipGraph: React.FC<Props> = ({ result, factors }) => {
     svg.append("defs").append("marker")
       .attr("id", "arrowhead-circle-mutual")
       .attr("viewBox", "0 -5 10 10")
-      .attr("refX", nodeRadius + 12)
+      .attr("refX", refX)
       .attr("refY", 0)
       .attr("markerWidth", 8)
       .attr("markerHeight", 8)
