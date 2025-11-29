@@ -16,7 +16,7 @@ interface Props {
 }
 
 const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
-  const [activeTab, setActiveTab] = useState<'hierarchy' | 'digraph' | 'micmac' | 'analysis' | 'irm' | 'frm'>('hierarchy');
+  const [activeTab, setActiveTab] = useState<'hierarchy' | 'digraph' | 'micmac' | 'analysis' | 'irm' | 'frm'>('irm');
   const exportRef = useRef<HTMLDivElement>(null);
 
   const handleDownloadPNG = async () => {
@@ -207,11 +207,9 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
             <tr>
               <th className="p-2 border border-slate-300 bg-slate-800 text-white font-mono text-xs w-[250px]">i \ j</th>
               {factors.map((f, i) => (
-                <th key={i} className="p-2 border border-slate-300 bg-slate-100 text-slate-800 w-12 text-center text-xs font-bold align-bottom h-40">
-                  <div className="transform -rotate-90 origin-bottom-left w-6 whitespace-nowrap overflow-visible translate-x-3 mb-2 text-left">
-                    {/* Columns: Short ID Only */}
-                    <span className="mr-2 text-slate-900 font-extrabold">{f.name}</span>
-                  </div>
+                <th key={i} className="p-2 border border-slate-300 bg-slate-100 text-slate-800 w-12 text-center text-xs font-bold font-mono">
+                    {/* Columns: Short ID Only, Horizontal */}
+                    {f.name}
                 </th>
               ))}
             </tr>
@@ -260,15 +258,13 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
               <tr>
                 <th className="p-2 border border-slate-300 bg-slate-800 text-white font-mono text-xs w-[250px]">i \ j</th>
                 {factors.map((f, i) => (
-                  <th key={i} className="p-2 border border-slate-300 bg-slate-100 text-slate-800 w-12 text-center text-xs font-bold align-bottom h-40">
-                     <div className="transform -rotate-90 origin-bottom-left w-6 whitespace-nowrap overflow-visible translate-x-3 mb-2 text-left">
-                        {/* Columns: Short ID Only */}
-                        <span className="mr-2 text-slate-900 font-extrabold">{f.name}</span>
-                     </div>
+                  <th key={i} className="p-2 border border-slate-300 bg-slate-100 text-slate-800 w-12 text-center text-xs font-bold font-mono">
+                     {/* Columns: Short ID Only, Horizontal */}
+                     {f.name}
                   </th>
                 ))}
-                <th className="p-2 border border-slate-300 bg-indigo-100 text-indigo-900 font-bold whitespace-nowrap text-center text-xs uppercase tracking-wider w-16 align-bottom">
-                    <div className="transform -rotate-90 origin-bottom-left w-6 whitespace-nowrap overflow-visible translate-x-8 mb-2">Driving Power</div>
+                <th className="p-2 border border-slate-300 bg-indigo-100 text-indigo-900 font-bold whitespace-nowrap text-center text-xs uppercase tracking-wider w-16">
+                    Driving Power
                 </th>
               </tr>
             </thead>
@@ -336,12 +332,12 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
            <div className="w-px h-8 bg-slate-300 mx-1 hidden md:block"></div>
            <div className="flex bg-slate-100 p-1 rounded-md">
             {[
-                { id: 'hierarchy', label: 'Hierarchy' },
-                { id: 'digraph', label: 'Digraph' },
-                { id: 'micmac', label: 'MICMAC' },
-                { id: 'analysis', label: 'Sets' },
-                { id: 'frm', label: 'Final' },
                 { id: 'irm', label: 'Initial' },
+                { id: 'frm', label: 'Final' },
+                { id: 'analysis', label: 'Sets' },
+                { id: 'digraph', label: 'Digraph' },
+                { id: 'hierarchy', label: 'Hierarchy' },
+                { id: 'micmac', label: 'MICMAC' },
             ].map(tab => (
                 <button
                 key={tab.id}

@@ -106,11 +106,9 @@ const SSIMGrid: React.FC<Props> = ({ factors, ssim, setSsim, onNext, onBack }) =
                 Factor i \ j
               </th>
               {factors.map((f, idx) => (
-                <th key={f.id} className="sticky top-0 z-20 bg-slate-50 p-2 text-slate-700 font-bold text-xs w-12 text-center border-b border-slate-300 border-r border-slate-100 shadow-sm align-bottom h-40">
-                  <div className="transform -rotate-90 origin-bottom-left w-6 whitespace-nowrap overflow-visible translate-x-3 mb-2 text-left">
-                     <span className="mr-2 text-slate-900 font-extrabold">{f.name}:</span>
-                     <span className="font-normal text-slate-500">{f.description}</span>
-                  </div>
+                <th key={f.id} className="sticky top-0 z-20 bg-slate-50 p-2 text-slate-700 font-bold text-xs w-12 text-center border-b border-slate-300 border-r border-slate-100 shadow-sm">
+                   {/* Horizontal Upright ID */}
+                   {f.name}
                 </th>
               ))}
             </tr>
