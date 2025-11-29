@@ -63,11 +63,13 @@ const App: React.FC = () => {
             <div className="p-2 bg-indigo-600 rounded-lg shadow-sm">
               <HardHat className="w-5 h-5 text-white" />
             </div>
-            <h1 className="text-xl font-bold bg-gradient-to-r from-slate-900 to-slate-600 bg-clip-text text-transparent hidden md:block">
+            <h1 className="text-xl font-bold bg-gradient-to-r from-slate-900 to-slate-600 bg-clip-text text-transparent hidden md:block whitespace-nowrap">
               SSIM Construction (TEST)
             </h1>
             <span className="text-slate-400 hidden md:block">|</span>
-            <p className="text-sm md:text-base font-semibold text-slate-700">Critical Factors Network</p>
+            <p className="text-xs md:text-sm lg:text-base font-semibold text-slate-700 truncate max-w-[200px] md:max-w-none">
+                Confined Space Accidents Critical Factors Network Mapping
+            </p>
           </div>
           <div className="hidden md:flex items-center gap-4 text-sm font-medium text-slate-400">
             <span className={step === AppStep.DEFINE_FACTORS ? 'text-indigo-600 font-bold' : ''}>1. Factors</span>
