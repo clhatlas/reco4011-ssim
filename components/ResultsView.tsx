@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { ISMResult, ISMElement } from '../types';
 import HierarchyGraph from './HierarchyGraph';
@@ -264,8 +263,7 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
                      {f.name}
                   </th>
                 ))}
-                {/* Fixed Driving Power Header: Expanded width and auto sizing to prevent clipping */}
-                <th className="p-2 border border-slate-300 bg-indigo-100 text-indigo-900 font-bold text-center whitespace-nowrap text-xs uppercase tracking-wider">
+                <th className="p-2 border border-slate-300 bg-indigo-100 text-indigo-900 font-bold whitespace-nowrap text-center text-xs uppercase tracking-wider w-16">
                     Driving Power
                 </th>
               </tr>
