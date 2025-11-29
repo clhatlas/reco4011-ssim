@@ -10,39 +10,53 @@ interface Props {
   onNext: () => void;
 }
 
-// Professional Color Palette (More Muted/Technical)
+// Professional Color Palette - High Contrast & Distinct
+// Using explicit class strings to ensure Tailwind picks them up
 const PALETTE = [
-  { name: 'Navy', bg: 'bg-slate-100', text: 'text-slate-800', border: 'border-slate-300', borderL: 'border-l-slate-500', hex: '#334155' },
-  { name: 'Blue', bg: 'bg-blue-50', text: 'text-blue-900', border: 'border-blue-200', borderL: 'border-l-blue-600', hex: '#2563eb' },
-  { name: 'Teal', bg: 'bg-teal-50', text: 'text-teal-900', border: 'border-teal-200', borderL: 'border-l-teal-600', hex: '#0d9488' },
-  { name: 'Indigo', bg: 'bg-indigo-50', text: 'text-indigo-900', border: 'border-indigo-200', borderL: 'border-l-indigo-600', hex: '#4f46e5' },
-  { name: 'Red', bg: 'bg-red-50', text: 'text-red-900', border: 'border-red-200', borderL: 'border-l-red-600', hex: '#dc2626' },
-  { name: 'Amber', bg: 'bg-amber-50', text: 'text-amber-900', border: 'border-amber-200', borderL: 'border-l-amber-500', hex: '#d97706' },
-  { name: 'Emerald', bg: 'bg-emerald-50', text: 'text-emerald-900', border: 'border-emerald-200', borderL: 'border-l-emerald-600', hex: '#059669' },
-  { name: 'Violet', bg: 'bg-violet-50', text: 'text-violet-900', border: 'border-violet-200', borderL: 'border-l-violet-600', hex: '#7c3aed' },
-  { name: 'Cyan', bg: 'bg-cyan-50', text: 'text-cyan-900', border: 'border-cyan-200', borderL: 'border-l-cyan-600', hex: '#0891b2' },
+  { name: 'Red', bg: 'bg-red-100', text: 'text-red-900', border: 'border-red-300', borderL: 'border-l-red-600', hex: '#dc2626' },
+  { name: 'Blue', bg: 'bg-blue-100', text: 'text-blue-900', border: 'border-blue-300', borderL: 'border-l-blue-600', hex: '#2563eb' },
+  { name: 'Emerald', bg: 'bg-emerald-100', text: 'text-emerald-900', border: 'border-emerald-300', borderL: 'border-l-emerald-600', hex: '#059669' },
+  { name: 'Amber', bg: 'bg-amber-100', text: 'text-amber-900', border: 'border-amber-300', borderL: 'border-l-amber-600', hex: '#d97706' },
+  { name: 'Purple', bg: 'bg-purple-100', text: 'text-purple-900', border: 'border-purple-300', borderL: 'border-l-purple-600', hex: '#7c3aed' },
+  { name: 'Pink', bg: 'bg-pink-100', text: 'text-pink-900', border: 'border-pink-300', borderL: 'border-l-pink-600', hex: '#db2777' },
+  { name: 'Cyan', bg: 'bg-cyan-100', text: 'text-cyan-900', border: 'border-cyan-300', borderL: 'border-l-cyan-600', hex: '#0891b2' },
+  { name: 'Lime', bg: 'bg-lime-100', text: 'text-lime-900', border: 'border-lime-300', borderL: 'border-l-lime-600', hex: '#65a30d' },
+  { name: 'Orange', bg: 'bg-orange-100', text: 'text-orange-900', border: 'border-orange-300', borderL: 'border-l-orange-600', hex: '#ea580c' },
+  { name: 'Slate', bg: 'bg-slate-200', text: 'text-slate-800', border: 'border-slate-400', borderL: 'border-l-slate-600', hex: '#475569' },
 ];
 
 const KNOWN_MAPPINGS: Record<string, number> = {
-  'Management': 0,
-  'Cost': 1,
-  'Organization': 2,
-  'Technology': 3,
-  'Knowledge': 4,
-  'Process': 5,
-  'Policy': 6,
-  'Environment': 7,
-  'Safety': 8,
+  'management': 0, // Red
+  'cost': 8, // Orange
+  'financial': 8,
+  'organization': 1, // Blue
+  'technology': 6, // Cyan
+  'technical': 6,
+  'knowledge': 4, // Purple
+  'process': 3, // Amber
+  'policy': 9, // Slate
+  'legal': 9,
+  'environment': 2, // Emerald
+  'safety': 7, // Lime
 };
 
 export const getCategoryTheme = (category?: string) => {
-  if (!category) return PALETTE[0]; 
-  if (KNOWN_MAPPINGS[category] !== undefined) {
-    return PALETTE[KNOWN_MAPPINGS[category]];
+  if (!category) return PALETTE[9]; // Default Slate
+  
+  const normalizedCat = category.toLowerCase().trim();
+  
+  // Check known mappings (case-insensitive)
+  for (const key in KNOWN_MAPPINGS) {
+      if (normalizedCat.includes(key)) {
+          return PALETTE[KNOWN_MAPPINGS[key]];
+      }
   }
+
+  // Robust Hashing for unknown categories
   let hash = 0;
-  for (let i = 0; i < category.length; i++) {
-    hash = category.charCodeAt(i) + ((hash << 5) - hash);
+  for (let i = 0; i < normalizedCat.length; i++) {
+    hash = ((hash << 5) - hash) + normalizedCat.charCodeAt(i);
+    hash |= 0; // Convert to 32bit integer
   }
   return PALETTE[Math.abs(hash) % PALETTE.length];
 };
@@ -86,13 +100,14 @@ const FactorInput: React.FC<Props> = ({ factors, setFactors, onNext }) => {
   };
 
   const handleDeleteFactor = (id: string) => {
-    if (confirm("Are you sure you want to delete this factor?")) {
-      setFactors(factors.filter(f => f.id !== id));
+    // Standard confirm dialog
+    if (window.confirm("Are you sure you want to delete this factor?")) {
+      setFactors(prevFactors => prevFactors.filter(f => f.id !== id));
     }
   };
 
   const handleClearAll = () => {
-    if (confirm("Are you sure you want to delete ALL factors?")) {
+    if (window.confirm("Are you sure you want to delete ALL factors? This cannot be undone.")) {
       setFactors([]);
     }
   };
@@ -116,6 +131,7 @@ const FactorInput: React.FC<Props> = ({ factors, setFactors, onNext }) => {
     for (let i = 1; i < lines.length; i++) {
         const line = lines[i];
         if (!line.trim()) continue;
+        // Basic CSV splitting handling quotes
         const values = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(v => v.trim().replace(/^"|"$/g, '').replace(/""/g, '"'));
         const factor: any = { id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2) };
         headers.forEach((h, idx) => {
@@ -138,12 +154,18 @@ const FactorInput: React.FC<Props> = ({ factors, setFactors, onNext }) => {
     reader.onload = (event) => {
         const text = event.target?.result as string;
         try {
+            let parsed: ISMElement[] = [];
             if (file.name.toLowerCase().endsWith('.csv')) {
-                const parsed = parseCSV(text);
-                if (parsed.length > 0) setFactors(parsed);
+                parsed = parseCSV(text);
             } else {
-                const parsed = JSON.parse(text);
-                if (Array.isArray(parsed) && parsed.length > 0) setFactors(parsed);
+                parsed = JSON.parse(text);
+            }
+
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                setFactors(parsed);
+                // Force a re-render or ensure state update is noticed
+            } else {
+                alert("No valid factors found.");
             }
         } catch (err) { console.error(err); alert("Failed to parse file."); }
         if (fileInputRef.current) fileInputRef.current.value = "";
@@ -191,30 +213,31 @@ const FactorInput: React.FC<Props> = ({ factors, setFactors, onNext }) => {
            <input type="file" ref={fileInputRef} className="hidden" accept=".json,.csv" onChange={handleImport} />
            
            <div className="flex bg-white rounded-md shadow-sm border border-slate-300 overflow-hidden divide-x divide-slate-200">
-              <button onClick={handleDownloadTemplate} className="px-3 py-2 hover:bg-slate-50 text-slate-600 text-xs font-medium flex items-center gap-2">
+              <button type="button" onClick={handleDownloadTemplate} className="px-3 py-2 hover:bg-slate-50 text-slate-600 text-xs font-medium flex items-center gap-2">
                  <FileDown className="w-4 h-4" /> Template
               </button>
-              <button onClick={() => fileInputRef.current?.click()} className="px-3 py-2 hover:bg-slate-50 text-slate-600 text-xs font-medium flex items-center gap-2">
+              <button type="button" onClick={() => fileInputRef.current?.click()} className="px-3 py-2 hover:bg-slate-50 text-slate-600 text-xs font-medium flex items-center gap-2">
                  <Upload className="w-4 h-4" /> Import
               </button>
            </div>
            
            <div className="flex bg-white rounded-md shadow-sm border border-slate-300 overflow-hidden divide-x divide-slate-200">
-             <button onClick={handleExportJSON} className="px-3 py-2 hover:bg-slate-50 text-slate-600 text-xs font-medium flex items-center gap-2">
+             <button type="button" onClick={handleExportJSON} className="px-3 py-2 hover:bg-slate-50 text-slate-600 text-xs font-medium flex items-center gap-2">
                 <FileJson className="w-4 h-4" /> JSON
              </button>
-             <button onClick={handleExportCSV} className="px-3 py-2 hover:bg-slate-50 text-slate-600 text-xs font-medium flex items-center gap-2">
+             <button type="button" onClick={handleExportCSV} className="px-3 py-2 hover:bg-slate-50 text-slate-600 text-xs font-medium flex items-center gap-2">
                 <FileText className="w-4 h-4" /> CSV
              </button>
            </div>
 
-           <button onClick={handleClearAll} className="px-3 py-2 bg-white border border-red-200 text-red-600 rounded-md hover:bg-red-50 text-xs font-medium flex items-center gap-2">
+           <button type="button" onClick={handleClearAll} className="px-3 py-2 bg-white border border-red-200 text-red-600 rounded-md hover:bg-red-50 text-xs font-medium flex items-center gap-2">
              <Trash className="w-4 h-4" /> Clear
            </button>
 
            <div className="w-px h-6 bg-slate-300 mx-2 hidden md:block"></div>
 
            <button 
+              type="button"
               onClick={() => setIsAdding(!isAdding)}
               className={`flex items-center gap-2 px-4 py-2 rounded-md font-bold text-sm transition-colors border ${isAdding ? 'bg-slate-100 text-slate-600 border-slate-300' : 'bg-slate-800 text-white border-slate-900 hover:bg-slate-700'}`}
            >
@@ -263,6 +286,7 @@ const FactorInput: React.FC<Props> = ({ factors, setFactors, onNext }) => {
                 </div>
                 <div className="md:col-span-2 flex items-end">
                     <button 
+                        type="button"
                         onClick={handleAddFactor}
                         className="w-full py-2.5 bg-slate-800 text-white font-bold text-sm rounded-md hover:bg-slate-700 transition-colors shadow-sm"
                     >
@@ -318,10 +342,10 @@ const FactorInput: React.FC<Props> = ({ factors, setFactors, onNext }) => {
                             </datalist>
                         </div>
                         <div className="md:col-span-2 flex items-center gap-2 justify-end">
-                            <button onClick={saveEdit} className="p-2 bg-slate-800 text-white rounded hover:bg-slate-700" title="Save">
+                            <button type="button" onClick={saveEdit} className="p-2 bg-slate-800 text-white rounded hover:bg-slate-700" title="Save">
                                 <Save className="w-4 h-4" />
                             </button>
-                            <button onClick={() => setEditingId(null)} className="p-2 bg-white border border-slate-300 text-slate-600 rounded hover:bg-slate-50" title="Cancel">
+                            <button type="button" onClick={() => setEditingId(null)} className="p-2 bg-white border border-slate-300 text-slate-600 rounded hover:bg-slate-50" title="Cancel">
                                 <X className="w-4 h-4" />
                             </button>
                         </div>
@@ -330,7 +354,7 @@ const FactorInput: React.FC<Props> = ({ factors, setFactors, onNext }) => {
              }
 
              return (
-              <div key={factor.id} className="flex items-center justify-between p-4 hover:bg-slate-50 transition-colors group">
+              <div key={factor.id} className="flex items-center justify-between p-4 hover:bg-slate-50 transition-colors group relative">
                 <div className="flex items-center gap-4 overflow-hidden flex-1">
                   <span className={`flex-shrink-0 flex items-center justify-center w-10 h-10 rounded text-xs font-bold border ${catColor}`}>
                     {factor.name}
@@ -347,17 +371,20 @@ const FactorInput: React.FC<Props> = ({ factors, setFactors, onNext }) => {
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-4">
+                {/* Actions: Removed opacity-0 to ensure they are clickable on mobile/touch devices */}
+                <div className="flex items-center gap-1 ml-4">
                     <button 
+                        type="button"
                         onClick={() => startEdit(factor)}
-                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded"
+                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
                         title="Edit"
                     >
                         <Edit2 className="w-4 h-4" />
                     </button>
                     <button 
+                        type="button"
                         onClick={() => handleDeleteFactor(factor.id)}
-                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded"
+                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
                         title="Delete"
                     >
                         <Trash2 className="w-4 h-4" />
@@ -371,6 +398,7 @@ const FactorInput: React.FC<Props> = ({ factors, setFactors, onNext }) => {
 
       <div className="flex justify-end pt-6">
         <button
+          type="button"
           onClick={onNext}
           disabled={factors.length < 2}
           className={`px-6 py-3 font-bold text-sm rounded-md shadow-sm transition-all flex items-center gap-2 ${factors.length < 2 ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-slate-900 hover:bg-slate-800 text-white'}`}

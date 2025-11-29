@@ -163,7 +163,7 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
           html += '<tr><td colspan="5"></td></tr>';
       }
       html += '<thead><tr><th>i \\ j</th>';
-      factors.forEach(f => html += `<th>${f.name}: ${f.description || ''}</th>`);
+      factors.forEach(f => html += `<th>${f.name}</th>`);
       if(isFinal) html += '<th>Driving Power</th>';
       html += '</tr></thead><tbody>';
       const size = matrix.length;
@@ -207,8 +207,7 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
               {factors.map((f, i) => (
                 <th key={i} className="p-2 border border-slate-300 bg-slate-100 text-slate-800 w-12 text-center text-xs font-bold align-bottom h-40">
                   <div className="transform -rotate-90 origin-bottom-left w-6 whitespace-nowrap overflow-visible translate-x-3 mb-2 text-left">
-                    <span className="mr-2 text-slate-900 font-extrabold">{f.name}:</span>
-                    <span className="font-normal text-slate-600">{f.description}</span>
+                    <span className="mr-2 text-slate-900 font-extrabold">{f.name}</span>
                   </div>
                 </th>
               ))}
@@ -259,8 +258,7 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
                 {factors.map((f, i) => (
                   <th key={i} className="p-2 border border-slate-300 bg-slate-100 text-slate-800 w-12 text-center text-xs font-bold align-bottom h-40">
                      <div className="transform -rotate-90 origin-bottom-left w-6 whitespace-nowrap overflow-visible translate-x-3 mb-2 text-left">
-                        <span className="mr-2 text-slate-900 font-extrabold">{f.name}:</span>
-                        <span className="font-normal text-slate-600">{f.description}</span>
+                        <span className="mr-2 text-slate-900 font-extrabold">{f.name}</span>
                      </div>
                   </th>
                 ))}

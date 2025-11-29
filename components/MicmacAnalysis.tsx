@@ -100,7 +100,8 @@ const MicmacAnalysis: React.FC<Props> = ({ result, factors }) => {
 
     const width = containerRef.current.clientWidth || 600;
     const height = 500;
-    const margin = { top: 40, right: 40, bottom: 50, left: 50 };
+    // Increased margins to prevent clipping of axis labels and extreme points
+    const margin = { top: 40, right: 60, bottom: 60, left: 60 };
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
 
@@ -120,8 +121,9 @@ const MicmacAnalysis: React.FC<Props> = ({ result, factors }) => {
     // Max value is number of factors (N)
     const maxVal = factors.length;
     
+    // Adjusted domains to add a small buffer so points aren't cut off on the edge
     const xScale = d3.scaleLinear()
-      .domain([0, maxVal + 1]) // Add buffer
+      .domain([0, maxVal + 1]) 
       .range([0, innerWidth]);
 
     const yScale = d3.scaleLinear()
@@ -201,7 +203,7 @@ const MicmacAnalysis: React.FC<Props> = ({ result, factors }) => {
     // Axis Labels
     svg.append("text")
       .attr("x", width / 2)
-      .attr("y", height - 10)
+      .attr("y", height - 15)
       .attr("text-anchor", "middle")
       .attr("font-weight", "bold")
       .attr("font-family", "Helvetica Neue, Helvetica, Arial, sans-serif")
@@ -211,7 +213,7 @@ const MicmacAnalysis: React.FC<Props> = ({ result, factors }) => {
     svg.append("text")
       .attr("transform", "rotate(-90)")
       .attr("x", -height / 2)
-      .attr("y", 15)
+      .attr("y", 20)
       .attr("text-anchor", "middle")
       .attr("font-weight", "bold")
       .attr("font-family", "Helvetica Neue, Helvetica, Arial, sans-serif")
