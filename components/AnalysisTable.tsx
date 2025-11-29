@@ -63,7 +63,7 @@ const AnalysisTable: React.FC<Props> = ({ factors, result }) => {
         <tbody className="bg-white">
           {tableData.map((row) => (
             <tr key={row.id} className="hover:bg-slate-50 transition-colors">
-              <td className="p-3 border border-slate-200 font-mono font-medium text-slate-900">{row.name}</td>
+              <td className="p-3 border border-slate-200 font-semibold text-slate-900">{row.name}</td>
               <td className="p-3 border border-slate-200 text-slate-600 break-words max-w-xs">{row.reachability}</td>
               <td className="p-3 border border-slate-200 text-slate-600 break-words max-w-xs">{row.antecedent}</td>
               <td className="p-3 border border-slate-200 text-slate-600 break-words max-w-xs">{row.intersection}</td>

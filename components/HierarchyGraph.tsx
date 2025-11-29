@@ -19,10 +19,19 @@ const HierarchyGraph: React.FC<Props> = ({ result, factors }) => {
     d3.select(svgRef.current).selectAll("*").remove();
 
     const { levels, initialReachabilityMatrix } = result;
-    const width = containerRef.current.clientWidth || 800;
-    const levelHeight = 140; // Spacing
-    const height = Math.max(600, levels.length * levelHeight + 100);
-    const nodeRadius = 24;
+    
+    // Configuration for Boxes
+    const boxWidth = 220;
+    const boxHeight = 80;
+    const hGap = 40; // Horizontal gap between boxes
+    const vGap = 100; // Vertical gap between levels
+    
+    // Calculate canvas size
+    const maxNodesInLevel = Math.max(...levels.map(l => l.elements.length));
+    const requiredWidth = maxNodesInLevel * (boxWidth + hGap) + 100;
+    const containerWidth = containerRef.current.clientWidth || 800;
+    const width = Math.max(containerWidth, requiredWidth);
+    const height = Math.max(600, levels.length * (boxHeight + vGap) + 100);
 
     const svg = d3.select(svgRef.current)
       .attr("width", width)
@@ -30,11 +39,29 @@ const HierarchyGraph: React.FC<Props> = ({ result, factors }) => {
       .attr("viewBox", [0, 0, width, height])
       .style("background-color", "#ffffff");
 
-    // Define Arrowhead marker
-    svg.append("defs").append("marker")
-      .attr("id", "arrowhead")
+    // Define Arrowhead markers
+    const defs = svg.append("defs");
+    
+    // 1. Arrowhead for Side Entry (Same Level)
+    // RefX accounts for box half-width (110) + arrow length (10)
+    defs.append("marker")
+      .attr("id", "arrowhead-side")
       .attr("viewBox", "0 -5 10 10")
-      .attr("refX", nodeRadius + 8)
+      .attr("refX", boxWidth / 2 + 10) 
+      .attr("refY", 0)
+      .attr("markerWidth", 6)
+      .attr("markerHeight", 6)
+      .attr("orient", "auto")
+      .append("path")
+      .attr("d", "M0,-5L10,0L0,5")
+      .attr("fill", "#94a3b8");
+
+    // 2. Arrowhead for Bottom Entry (Level Up)
+    // RefX is small because the line stops exactly at the edge
+    defs.append("marker")
+      .attr("id", "arrowhead-bottom")
+      .attr("viewBox", "0 -5 10 10")
+      .attr("refX", 10) 
       .attr("refY", 0)
       .attr("markerWidth", 6)
       .attr("markerHeight", 6)
@@ -45,17 +72,19 @@ const HierarchyGraph: React.FC<Props> = ({ result, factors }) => {
 
     const nodes: any[] = [];
     
-    // Position Levels
-    // Level 1 is Top (Dependent). Higher Levels are Bottom (Driving).
+    // Position Levels (Top-Down)
     levels.forEach((lvl, lvlIndex) => {
-        const y = 50 + (lvlIndex * levelHeight);
+        const y = 50 + (lvlIndex * (boxHeight + vGap));
         const count = lvl.elements.length;
-        const spacing = width / (count + 1);
+        
+        // Center the level horizontally
+        const totalLevelWidth = count * boxWidth + (count - 1) * hGap;
+        const startX = (width - totalLevelWidth) / 2;
 
         lvl.elements.forEach((elIndex, i) => {
             nodes.push({
                 id: elIndex,
-                x: spacing * (i + 1),
+                x: startX + i * (boxWidth + hGap),
                 y: y,
                 level: lvl.level,
                 data: factors[elIndex]
@@ -63,8 +92,10 @@ const HierarchyGraph: React.FC<Props> = ({ result, factors }) => {
         });
     });
 
-    // Prepare Link Data from Initial Reachability Matrix (User Input)
-    // instead of Canonical Matrix (Transitive Reduction) to show ALL connections.
+    // Prepare Link Data from Initial Reachability Matrix
+    // Filter logic: Only Same-Level or One-Level-Up (Lower Level Index -> Higher Level Index in terms of geometry)
+    // Note: levels are usually 1 (Top) to N (Bottom). 
+    // Driving factor (Level N) -> Dependent factor (Level N-1).
     const links: any[] = [];
     const matrix = initialReachabilityMatrix;
     
@@ -74,7 +105,14 @@ const HierarchyGraph: React.FC<Props> = ({ result, factors }) => {
                 const source = nodes.find(n => n.id === i);
                 const target = nodes.find(n => n.id === j);
                 if (source && target) {
-                    links.push({ source, target });
+                    // Logic: source.level (e.g. 5) -> target.level (e.g. 4)
+                    // Difference should be 1 for adjacent level up.
+                    // Or 0 for same level.
+                    const levelDiff = source.level - target.level;
+
+                    if (levelDiff === 0 || levelDiff === 1) {
+                        links.push({ source, target, levelDiff });
+                    }
                 }
             }
         }
@@ -87,73 +125,72 @@ const HierarchyGraph: React.FC<Props> = ({ result, factors }) => {
         .append("path")
         .attr("class", "link")
         .attr("d", (d: any) => {
-            const dx = d.target.x - d.source.x;
-            const dy = d.target.y - d.source.y;
-            const dr = Math.sqrt(dx * dx + dy * dy); 
-            
-            // Check if same level
-            if (d.source.level === d.target.level) {
-                 // Curve for same level
-                 return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
+            if (d.levelDiff === 0) {
+                // Same Level: Straight line Center-to-Center
+                const sx = d.source.x + boxWidth / 2;
+                const sy = d.source.y + boxHeight / 2;
+                const tx = d.target.x + boxWidth / 2;
+                const ty = d.target.y + boxHeight / 2;
+                return `M${sx},${sy}L${tx},${ty}`;
+            } else {
+                // Adjacent Level (Source Below Target)
+                // Elbow: Source Top -> Target Bottom
+                const startX = d.source.x + boxWidth / 2;
+                const startY = d.source.y; // Top edge
+                const endX = d.target.x + boxWidth / 2;
+                const endY = d.target.y + boxHeight; // Bottom edge
+                
+                const midY = (startY + endY) / 2;
+                
+                return `M${startX},${startY}V${midY}H${endX}V${endY}`;
             }
-
-            // Straight line for standard hierarchical links
-            return `M${d.source.x},${d.source.y}L${d.target.x},${d.target.y}`;
         })
         .attr("fill", "none")
         .attr("stroke", "#94a3b8")
         .attr("stroke-width", 2)
-        .attr("marker-end", "url(#arrowhead)");
+        .attr("marker-end", (d: any) => d.levelDiff === 0 ? "url(#arrowhead-side)" : "url(#arrowhead-bottom)");
 
-    // Draw Nodes
+    // Draw Nodes (Groups)
     const nodeGroups = svg.selectAll(".node")
         .data(nodes)
         .enter()
         .append("g")
         .attr("class", "node")
-        .attr("cursor", "default")
         .attr("transform", (d: any) => `translate(${d.x},${d.y})`);
 
-    // Node Circle
-    nodeGroups.append("circle")
-        .attr("r", nodeRadius)
+    // Box Rect
+    nodeGroups.append("rect")
+        .attr("width", boxWidth)
+        .attr("height", boxHeight)
+        .attr("rx", 6) // Rounded corners
         .attr("fill", "#ffffff")
         .attr("stroke", (d:any) => getCategoryColorHex(d.data.category))
-        .attr("stroke-width", 4)
-        .attr("filter", "drop-shadow(0px 2px 4px rgba(0,0,0,0.1))");
+        .attr("stroke-width", 2)
+        .attr("filter", "drop-shadow(0px 4px 6px rgba(0,0,0,0.1))");
 
-    // Node ID Text (Using Name/Code like B02 instead of Index)
-    nodeGroups.append("text")
-        .attr("dy", 5)
-        .attr("text-anchor", "middle")
-        .text((d: any) => d.data.name)
-        .attr("fill", "#1e293b")
-        .attr("font-weight", "bold")
-        .attr("font-family", "monospace")
-        .attr("font-size", "12px");
+    // HTML Content via foreignObject for text wrapping
+    nodeGroups.append("foreignObject")
+        .attr("width", boxWidth)
+        .attr("height", boxHeight)
+        .append("xhtml:div")
+        .style("width", "100%")
+        .style("height", "100%")
+        .style("display", "flex")
+        .style("flex-direction", "column")
+        .style("justify-content", "center")
+        .style("align-items", "center")
+        .style("padding", "8px")
+        .style("box-sizing", "border-box")
+        .style("text-align", "center")
+        .style("font-family", "Helvetica Neue, Helvetica, Arial, sans-serif")
+        .html((d: any) => `
+          <div style="font-weight:bold; font-size:14px; color:#334155; margin-bottom:4px; line-height:1;">${d.data.name}</div>
+          <div style="font-size:11px; line-height:1.3; color:#1e293b; overflow:hidden; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical;">
+            ${d.data.description || d.data.name}
+          </div>
+        `);
 
-    // Label Text (Below node)
-    const textGroup = nodeGroups.append("g")
-         .attr("transform", `translate(0, ${nodeRadius + 15})`);
-
-    textGroup.append("text")
-        .attr("text-anchor", "middle")
-        .text((d: any) => d.data.name)
-        .attr("fill", "#334155")
-        .attr("font-size", "11px")
-        .attr("font-weight", "600")
-        .each(function(d: any) {
-             const self = d3.select(this);
-             const desc = d.data.description || "";
-             if (desc.length > 20) {
-                 self.text(desc.substring(0, 18) + "...");
-             } else {
-                 self.text(desc);
-             }
-             self.append("title").text(desc);
-        });
-
-    // Level Indicators
+    // Level Labels
     const uniqueLevels = [...new Set(nodes.map((n:any) => n.level))].sort((a,b) => a-b);
     
     svg.selectAll(".level-label")
@@ -161,16 +198,17 @@ const HierarchyGraph: React.FC<Props> = ({ result, factors }) => {
        .enter()
        .append("text")
        .attr("x", 20)
-       .attr("y", (d: any, i) => 50 + (i * levelHeight))
+       .attr("y", (d: any, i) => 50 + (i * (boxHeight + vGap)) + boxHeight/2)
        .text((d: any) => `Level ${d}`)
        .attr("fill", "#64748b")
        .attr("font-weight", "bold")
        .attr("font-size", "14px")
+       .attr("font-family", "Helvetica Neue, Helvetica, Arial, sans-serif")
        .attr("alignment-baseline", "middle");
 
   }, [result, factors]);
 
-  // Compute unique categories present in the data for legend
+  // Legend
   const legendData = React.useMemo(() => {
      const cats = Array.from(new Set(factors.map(f => f.category).filter(Boolean))) as string[];
      return cats.map(c => ({ label: c, color: getCategoryColorHex(c) }));

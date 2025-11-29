@@ -156,6 +156,7 @@ const MicmacAnalysis: React.FC<Props> = ({ result, factors }) => {
       .attr("y", height - 10)
       .attr("text-anchor", "middle")
       .attr("font-weight", "bold")
+      .attr("font-family", "Helvetica Neue, Helvetica, Arial, sans-serif")
       .attr("fill", "#334155")
       .text("Dependence Power");
 
@@ -165,6 +166,7 @@ const MicmacAnalysis: React.FC<Props> = ({ result, factors }) => {
       .attr("y", 15)
       .attr("text-anchor", "middle")
       .attr("font-weight", "bold")
+      .attr("font-family", "Helvetica Neue, Helvetica, Arial, sans-serif")
       .attr("fill", "#334155")
       .text("Driving Power");
 
@@ -199,6 +201,7 @@ const MicmacAnalysis: React.FC<Props> = ({ result, factors }) => {
        .attr("y", labelPadding)
        .attr("dominant-baseline", "hanging")
        .attr("font-weight", "bold")
+       .attr("font-family", "Helvetica Neue, Helvetica, Arial, sans-serif")
        .attr("fill", "#475569")
        .style("font-size", "14px")
        .text("IV. Driver (Independent)");
@@ -210,6 +213,7 @@ const MicmacAnalysis: React.FC<Props> = ({ result, factors }) => {
        .attr("text-anchor", "end")
        .attr("dominant-baseline", "hanging")
        .attr("font-weight", "bold")
+       .attr("font-family", "Helvetica Neue, Helvetica, Arial, sans-serif")
        .attr("fill", "#475569")
        .style("font-size", "14px")
        .text("III. Linkage");
@@ -220,6 +224,7 @@ const MicmacAnalysis: React.FC<Props> = ({ result, factors }) => {
        .attr("y", innerHeight - labelPadding)
        .attr("dominant-baseline", "auto")
        .attr("font-weight", "bold")
+       .attr("font-family", "Helvetica Neue, Helvetica, Arial, sans-serif")
        .attr("fill", "#475569")
        .style("font-size", "14px")
        .text("I. Autonomous");
@@ -231,6 +236,7 @@ const MicmacAnalysis: React.FC<Props> = ({ result, factors }) => {
        .attr("text-anchor", "end")
        .attr("dominant-baseline", "auto")
        .attr("font-weight", "bold")
+       .attr("font-family", "Helvetica Neue, Helvetica, Arial, sans-serif")
        .attr("fill", "#475569")
        .style("font-size", "14px")
        .text("II. Dependent");
@@ -296,6 +302,7 @@ const MicmacAnalysis: React.FC<Props> = ({ result, factors }) => {
       .text(d => d.label)
       .attr("font-size", "10px")
       .attr("font-weight", "bold")
+      .attr("font-family", "Helvetica Neue, Helvetica, Arial, sans-serif")
       .attr("fill", "#334155");
 
     return () => {
@@ -315,7 +322,7 @@ const MicmacAnalysis: React.FC<Props> = ({ result, factors }) => {
                 <ul className="space-y-1">
                     {items.map(f => (
                         <li key={f.id} className="text-sm flex items-center gap-2">
-                             <span className="font-mono font-bold text-xs bg-slate-100 px-1 rounded">{f.name}</span>
+                             <span className="font-bold text-xs bg-slate-100 px-1 rounded">{f.name}</span>
                              <span className="truncate" title={f.description}>{f.description}</span>
                         </li>
                     ))}

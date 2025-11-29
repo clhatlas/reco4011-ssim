@@ -128,6 +128,7 @@ const InterrelationshipGraph: React.FC<Props> = ({ result, factors }) => {
         .text((d) => d.data.name)
         .attr("font-size", "12px")
         .attr("font-weight", "bold")
+        .attr("font-family", "Helvetica Neue, Helvetica, Arial, sans-serif")
         .attr("fill", "#1e293b")
         .style("pointer-events", "none");
 

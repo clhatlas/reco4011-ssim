@@ -119,10 +119,10 @@ const SSIMGrid: React.FC<Props> = ({ factors, ssim, setSsim, onNext, onBack }) =
           </p>
         </div>
         <div className="flex flex-wrap gap-2 md:gap-4 text-xs md:text-sm bg-white p-2 rounded-lg border border-slate-200 shadow-sm text-slate-700">
-          <div className="flex items-center gap-2 px-2 py-1 rounded bg-emerald-50 border border-emerald-100" title="i influences j"><span className="w-2 h-2 md:w-3 md:h-3 bg-emerald-500 rounded-full"></span> <span className="font-mono font-bold text-emerald-700">V</span>: i &rarr; j</div>
-          <div className="flex items-center gap-2 px-2 py-1 rounded bg-amber-50 border border-amber-100" title="j influences i"><span className="w-2 h-2 md:w-3 md:h-3 bg-amber-500 rounded-full"></span> <span className="font-mono font-bold text-amber-700">A</span>: j &rarr; i</div>
-          <div className="flex items-center gap-2 px-2 py-1 rounded bg-blue-50 border border-blue-100" title="Mutual influence"><span className="w-2 h-2 md:w-3 md:h-3 bg-blue-500 rounded-full"></span> <span className="font-mono font-bold text-blue-700">X</span>: i &harr; j</div>
-          <div className="flex items-center gap-2 px-2 py-1 rounded bg-slate-50" title="No relationship"><span className="w-2 h-2 md:w-3 md:h-3 bg-slate-300 rounded-full"></span> <span className="font-mono font-bold text-slate-400">O</span>: None</div>
+          <div className="flex items-center gap-2 px-2 py-1 rounded bg-emerald-50 border border-emerald-100" title="i influences j"><span className="w-2 h-2 md:w-3 md:h-3 bg-emerald-500 rounded-full"></span> <span className="font-bold text-emerald-700">V</span>: i &rarr; j</div>
+          <div className="flex items-center gap-2 px-2 py-1 rounded bg-amber-50 border border-amber-100" title="j influences i"><span className="w-2 h-2 md:w-3 md:h-3 bg-amber-500 rounded-full"></span> <span className="font-bold text-amber-700">A</span>: j &rarr; i</div>
+          <div className="flex items-center gap-2 px-2 py-1 rounded bg-blue-50 border border-blue-100" title="Mutual influence"><span className="w-2 h-2 md:w-3 md:h-3 bg-blue-500 rounded-full"></span> <span className="font-bold text-blue-700">X</span>: i &harr; j</div>
+          <div className="flex items-center gap-2 px-2 py-1 rounded bg-slate-50" title="No relationship"><span className="w-2 h-2 md:w-3 md:h-3 bg-slate-300 rounded-full"></span> <span className="font-bold text-slate-400">O</span>: None</div>
         </div>
       </div>
 
@@ -130,13 +130,13 @@ const SSIMGrid: React.FC<Props> = ({ factors, ssim, setSsim, onNext, onBack }) =
         <table className="border-collapse w-max min-w-full">
           <thead>
             <tr>
-              <th className="sticky top-0 left-0 z-30 bg-white p-2 text-left text-slate-500 font-mono text-sm border-b border-r border-slate-200 min-w-[200px] shadow-sm">
+              <th className="sticky top-0 left-0 z-30 bg-white p-2 text-left text-slate-500 font-bold text-sm border-b border-r border-slate-200 min-w-[200px] shadow-sm">
                 i \ j
               </th>
               {factors.map((f, idx) => (
-                <th key={f.id} className="sticky top-0 z-20 bg-white p-2 text-slate-700 font-mono text-xs w-10 md:w-14 text-center border-b border-slate-200 shadow-sm group relative cursor-help">
+                <th key={f.id} className="sticky top-0 z-20 bg-white p-2 text-slate-700 font-bold text-xs w-10 md:w-14 text-center border-b border-slate-200 shadow-sm group relative cursor-help">
                   {f.name}
-                  <div className="absolute hidden group-hover:block top-full left-1/2 -translate-x-1/2 bg-slate-800 text-white text-xs p-2 rounded shadow-xl whitespace-nowrap z-40 border border-slate-600 pointer-events-none">
+                  <div className="absolute hidden group-hover:block top-full left-1/2 -translate-x-1/2 bg-slate-800 text-white text-xs p-2 rounded shadow-xl whitespace-nowrap z-40 border border-slate-600 pointer-events-none font-normal">
                     <span className="font-bold text-emerald-300">{f.name}:</span> {f.description || f.name}
                     <br/>
                     <span className="text-slate-400 text-[10px]">{f.category}</span>
@@ -150,7 +150,7 @@ const SSIMGrid: React.FC<Props> = ({ factors, ssim, setSsim, onNext, onBack }) =
               <tr key={rowFactor.id} className="hover:bg-slate-50 transition-colors">
                 <td className={`sticky left-0 z-20 bg-white p-2 text-slate-700 text-xs md:text-sm font-medium border-r border-slate-200 border-l-4 ${getCategoryTheme(rowFactor.category).borderL} min-w-[200px] max-w-[300px] truncate shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] cursor-help`} title={rowFactor.description || rowFactor.name}>
                   <div className="flex items-center gap-2">
-                    <span className="inline-block w-8 text-slate-400 font-mono text-right">{rowFactor.name}.</span>
+                    <span className="inline-block w-8 text-slate-400 font-bold text-right">{rowFactor.name}.</span>
                     <span className="truncate">{rowFactor.description || rowFactor.name}</span>
                   </div>
                 </td>
