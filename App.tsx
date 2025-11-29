@@ -218,6 +218,7 @@ const App: React.FC = () => {
             <p className="text-xs text-slate-400 max-w-2xl text-center leading-relaxed">
                 Last Update: 30 November 2025
             </p>
+            </div>
         </div>
       </footer>
     </div>
