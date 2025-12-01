@@ -74,7 +74,3 @@ Before submitting a pull request, ensure that:
 Add your chosen license here (for example, MIT, Apache-2.0, or another suitable open-source license) and include the corresponding LICENSE file in the repository.
 
 All Rights Reserved - @clh.atlas 2025
-[17] ism https://github.com/ism
-[18] Hydrogen on Netlify https://docs.netlify.com/build/frameworks/framework-setup-guides/hydrogen/
-[19] JuergenOrth/ISMtools 简介: Tools for using ISM REST-API https://www.github-zh.com/projects/468717690-ismtools
-[20] Split Testing | Netlify Docs https://docs.netlify.com/manage/monitoring/split-testing/
