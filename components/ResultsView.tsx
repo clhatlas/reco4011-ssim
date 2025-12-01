@@ -59,9 +59,16 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
                     htmlEl.style.maxWidth = 'none';
                     htmlEl.style.display = 'block';
                 });
+
+                // 4. Ensure Keys don't wrap
+                const keys = element.querySelectorAll('.matrix-key');
+                keys.forEach(el => {
+                   (el as HTMLElement).style.whiteSpace = 'nowrap';
+                   (el as HTMLElement).style.width = 'max-content';
+                });
             }
             
-            // 4. Inject style for SVGs to ensure they use Times New Roman
+            // 5. Inject style for SVGs to ensure they use Times New Roman
             const svgs = clonedDoc.querySelectorAll('svg');
             svgs.forEach(svg => {
                 const svgStyle = clonedDoc.createElement('style');
@@ -70,6 +77,10 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
                     .node text { font-family: "Times New Roman", Times, serif !important; }
                 `;
                 svg.prepend(svgStyle);
+                // Ensure SVG is fully visible
+                svg.setAttribute('width', '100%');
+                svg.style.width = '100%';
+                svg.style.maxWidth = 'none';
             });
         }
       });
@@ -186,14 +197,24 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
                             htmlEl.style.maxWidth = 'none';
                             htmlEl.style.display = 'block';
                         });
+
+                        // 4. Ensure Keys don't wrap
+                        const keys = element.querySelectorAll('.matrix-key');
+                        keys.forEach(el => {
+                           (el as HTMLElement).style.whiteSpace = 'nowrap';
+                           (el as HTMLElement).style.width = 'max-content';
+                        });
                     }
                     
-                    // 4. Inject style for SVGs (like Micmac)
+                    // 5. Inject style for SVGs (like Micmac)
                     const svgs = clonedDoc.querySelectorAll('svg');
                     svgs.forEach(svg => {
                         const svgStyle = clonedDoc.createElement('style');
                         svgStyle.innerHTML = `text { font-family: "Times New Roman", Times, serif !important; }`;
                         svg.prepend(svgStyle);
+                        svg.setAttribute('width', '100%');
+                        svg.style.width = '100%';
+                        svg.style.maxWidth = 'none';
                     });
                 }
             });
@@ -308,10 +329,10 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
 
   const renderSimpleMatrix = (matrix: number[][]) => (
     <div className="space-y-4">
-      <div className="flex gap-4 text-xs bg-slate-50 p-3 rounded border border-slate-200">
+      <div className="flex flex-wrap gap-4 text-xs bg-slate-50 p-3 rounded border border-slate-200 matrix-key whitespace-nowrap">
           <span className="font-bold text-slate-700">Key:</span>
-          <div className="flex items-center gap-1.5"><span className="w-4 h-4 flex items-center justify-center bg-blue-100 text-blue-900 font-bold border border-blue-200 rounded text-[10px]">1</span> Relationship</div>
-          <div className="flex items-center gap-1.5"><span className="w-4 h-4 flex items-center justify-center bg-white text-slate-300 border border-slate-200 rounded text-[10px]">0</span> No Relation</div>
+          <div className="flex items-center gap-1.5"><span className="w-6 h-6 flex items-center justify-center bg-blue-100 text-blue-900 font-bold border border-blue-200 rounded text-[10px]">1</span> Relationship</div>
+          <div className="flex items-center gap-1.5"><span className="w-6 h-6 flex items-center justify-center bg-white text-slate-300 border border-slate-200 rounded text-[10px]">0</span> No Relation</div>
       </div>
       <div className="overflow-x-auto pb-4">
         <table className="w-full border-collapse text-sm border border-slate-300 table-auto">
@@ -357,11 +378,11 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
     return (
       <div className="space-y-4">
         {/* Key / Legend */}
-        <div className="flex gap-4 text-xs bg-slate-50 p-3 rounded border border-slate-200">
+        <div className="flex flex-wrap gap-4 text-xs bg-slate-50 p-3 rounded border border-slate-200 matrix-key whitespace-nowrap">
             <span className="font-bold text-slate-700">Key:</span>
-            <div className="flex items-center gap-1.5"><span className="w-4 h-4 flex items-center justify-center bg-blue-100 text-blue-900 font-bold border border-blue-200 rounded text-[10px]">1</span> Direct</div>
-            <div className="flex items-center gap-1.5"><span className="w-4 h-4 flex items-center justify-center bg-amber-100 text-amber-900 font-bold border border-amber-200 rounded text-[10px]">1*</span> Transitive</div>
-            <div className="flex items-center gap-1.5"><span className="w-4 h-4 flex items-center justify-center bg-white text-slate-300 border border-slate-200 rounded text-[10px]">0</span> No Relation</div>
+            <div className="flex items-center gap-1.5"><span className="w-6 h-6 flex items-center justify-center bg-blue-100 text-blue-900 font-bold border border-blue-200 rounded text-[10px]">1</span> Direct</div>
+            <div className="flex items-center gap-1.5"><span className="w-6 h-6 flex items-center justify-center bg-amber-100 text-amber-900 font-bold border border-amber-200 rounded text-[10px]">1*</span> Transitive</div>
+            <div className="flex items-center gap-1.5"><span className="w-6 h-6 flex items-center justify-center bg-white text-slate-300 border border-slate-200 rounded text-[10px]">0</span> No Relation</div>
         </div>
 
         <div className="overflow-x-auto pb-4">

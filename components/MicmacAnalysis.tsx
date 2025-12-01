@@ -105,7 +105,7 @@ const MicmacAnalysis: React.FC<Props> = ({ result, factors }) => {
     const height = 500;
     // Increased margins to prevent clipping of axis labels and extreme points
     // top increased to 60 to allow space for labels/legend
-    const margin = { top: 60, right: 60, bottom: 60, left: 60 };
+    const margin = { top: 60, right: 80, bottom: 60, left: 60 };
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
 
@@ -349,8 +349,15 @@ const MicmacAnalysis: React.FC<Props> = ({ result, factors }) => {
       .data(groupedData)
       .enter()
       .append("text")
-      .attr("x", d => xScale(d.dependencePower) + (d.factors.length > 1 ? 10 : 8))
+      .attr("x", d => {
+          // If the point is on the right half, anchor text to the left of the dot
+          // Otherwise anchor to the right
+          const isRightSide = d.dependencePower > maxVal / 2;
+          const offset = d.factors.length > 1 ? 10 : 8;
+          return isRightSide ? xScale(d.dependencePower) - offset : xScale(d.dependencePower) + offset;
+      })
       .attr("y", d => yScale(d.drivingPower) + 4)
+      .attr("text-anchor", d => d.dependencePower > maxVal / 2 ? "end" : "start") // Smart anchor
       .text(d => d.label)
       .attr("font-size", "10px")
       .attr("font-weight", "bold")
