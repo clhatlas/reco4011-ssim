@@ -212,7 +212,7 @@ const InterrelationshipGraph: React.FC<Props> = ({ result, factors }) => {
   }, [result, factors]);
 
   return (
-    <div ref={containerRef} className="w-full bg-white rounded-xl border border-slate-200 shadow-inner overflow-hidden">
+    <div ref={containerRef} className="w-full bg-white rounded-xl border border-slate-200 shadow-inner overflow-x-auto overflow-y-hidden">
         <svg id="interrelationship-graph-svg" ref={svgRef} className="block mx-auto"></svg>
     </div>
   );

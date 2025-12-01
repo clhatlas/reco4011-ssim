@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useRef } from 'react';
 import { ISMElement } from '../types';
 import { Tag, Plus, Trash2, Edit2, Save, X, Upload, FileJson, FileText, Trash, FileDown, ArrowRight, Check } from 'lucide-react';
@@ -52,12 +53,14 @@ export const getCategoryTheme = (category?: string) => {
   }
 
   // Robust Hashing for unknown categories
+  // Modified to use a different prime multiplier to separate similar strings better
   let hash = 0;
   for (let i = 0; i < normalizedCat.length; i++) {
     hash = ((hash << 5) - hash) + normalizedCat.charCodeAt(i);
     hash |= 0; // Convert to 32bit integer
   }
-  return PALETTE[Math.abs(hash) % PALETTE.length];
+  // Added salt to shift distribution
+  return PALETTE[Math.abs(hash + 13) % PALETTE.length];
 };
 
 export const getCategoryColorClasses = (category?: string) => {
@@ -232,45 +235,47 @@ const FactorInput: React.FC<Props> = ({ factors, setFactors, onNext }) => {
           <p className="text-slate-500 text-sm mt-1">Manage the variables for your structural model.</p>
         </div>
         
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
            <input type="file" ref={fileInputRef} className="hidden" accept=".json,.csv" onChange={handleImport} />
            
-           <div className="flex bg-white rounded-md shadow-sm border border-slate-300 overflow-hidden divide-x divide-slate-200">
-              <button type="button" onClick={handleDownloadTemplate} className="px-3 py-2 hover:bg-slate-50 text-slate-600 text-xs font-medium flex items-center gap-2">
-                 <FileDown className="w-4 h-4" /> Template
-              </button>
-              <button type="button" onClick={() => fileInputRef.current?.click()} className="px-3 py-2 hover:bg-slate-50 text-slate-600 text-xs font-medium flex items-center gap-2">
-                 <Upload className="w-4 h-4" /> Import
-              </button>
-           </div>
-           
-           <div className="flex bg-white rounded-md shadow-sm border border-slate-300 overflow-hidden divide-x divide-slate-200">
-             <button type="button" onClick={handleExportJSON} className="px-3 py-2 hover:bg-slate-50 text-slate-600 text-xs font-medium flex items-center gap-2">
-                <FileJson className="w-4 h-4" /> JSON
+           <div className="flex flex-wrap gap-3">
+             <div className="flex bg-white rounded-md shadow-sm border border-slate-300 overflow-hidden divide-x divide-slate-200">
+                <button type="button" onClick={handleDownloadTemplate} className="px-3 py-2 hover:bg-slate-50 text-slate-600 text-xs font-medium flex items-center gap-2">
+                   <FileDown className="w-4 h-4" /> Template
+                </button>
+                <button type="button" onClick={() => fileInputRef.current?.click()} className="px-3 py-2 hover:bg-slate-50 text-slate-600 text-xs font-medium flex items-center gap-2">
+                   <Upload className="w-4 h-4" /> Import
+                </button>
+             </div>
+             
+             <div className="flex bg-white rounded-md shadow-sm border border-slate-300 overflow-hidden divide-x divide-slate-200">
+               <button type="button" onClick={handleExportJSON} className="px-3 py-2 hover:bg-slate-50 text-slate-600 text-xs font-medium flex items-center gap-2">
+                  <FileJson className="w-4 h-4" /> JSON
+               </button>
+               <button type="button" onClick={handleExportCSV} className="px-3 py-2 hover:bg-slate-50 text-slate-600 text-xs font-medium flex items-center gap-2">
+                  <FileText className="w-4 h-4" /> CSV
+               </button>
+             </div>
+
+             <button 
+               type="button" 
+               onClick={handleClearClick} 
+               className={`px-3 py-2 border rounded-md text-xs font-medium flex items-center gap-2 transition-colors ${clearConfirm ? 'bg-red-600 text-white border-red-700 hover:bg-red-700' : 'bg-white border-red-200 text-red-600 hover:bg-red-50'}`}
+             >
+               {clearConfirm ? <Check className="w-4 h-4" /> : <Trash className="w-4 h-4" />}
+               {clearConfirm ? "Confirm?" : "Clear"}
              </button>
-             <button type="button" onClick={handleExportCSV} className="px-3 py-2 hover:bg-slate-50 text-slate-600 text-xs font-medium flex items-center gap-2">
-                <FileText className="w-4 h-4" /> CSV
+
+             <div className="hidden md:block w-px h-6 bg-slate-300 mx-2"></div>
+
+             <button 
+                type="button"
+                onClick={() => setIsAdding(!isAdding)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-md font-bold text-sm transition-colors border w-full sm:w-auto justify-center ${isAdding ? 'bg-slate-100 text-slate-600 border-slate-300' : 'bg-slate-800 text-white border-slate-900 hover:bg-slate-700'}`}
+             >
+               {isAdding ? <><X className="w-4 h-4"/> Cancel</> : <><Plus className="w-4 h-4"/> Add Factor</>}
              </button>
            </div>
-
-           <button 
-             type="button" 
-             onClick={handleClearClick} 
-             className={`px-3 py-2 border rounded-md text-xs font-medium flex items-center gap-2 transition-colors ${clearConfirm ? 'bg-red-600 text-white border-red-700 hover:bg-red-700' : 'bg-white border-red-200 text-red-600 hover:bg-red-50'}`}
-           >
-             {clearConfirm ? <Check className="w-4 h-4" /> : <Trash className="w-4 h-4" />}
-             {clearConfirm ? "Confirm Clear?" : "Clear"}
-           </button>
-
-           <div className="w-px h-6 bg-slate-300 mx-2 hidden md:block"></div>
-
-           <button 
-              type="button"
-              onClick={() => setIsAdding(!isAdding)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-md font-bold text-sm transition-colors border ${isAdding ? 'bg-slate-100 text-slate-600 border-slate-300' : 'bg-slate-800 text-white border-slate-900 hover:bg-slate-700'}`}
-           >
-             {isAdding ? <><X className="w-4 h-4"/> Cancel</> : <><Plus className="w-4 h-4"/> Add Factor</>}
-           </button>
         </div>
       </div>
 
@@ -383,7 +388,7 @@ const FactorInput: React.FC<Props> = ({ factors, setFactors, onNext }) => {
              }
 
              return (
-              <div key={factor.id} className="flex items-center justify-between p-4 hover:bg-slate-50 transition-colors group relative">
+              <div key={factor.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 hover:bg-slate-50 transition-colors group relative gap-3 sm:gap-4">
                 <div className="flex items-center gap-4 overflow-hidden flex-1">
                   <span className={`flex-shrink-0 flex items-center justify-center w-10 h-10 rounded text-xs font-bold border ${catColor}`}>
                     {factor.name}
@@ -392,7 +397,7 @@ const FactorInput: React.FC<Props> = ({ factors, setFactors, onNext }) => {
                     <div className="flex items-center gap-3 flex-wrap">
                       <p className="text-slate-900 font-medium truncate">{factor.description || factor.name}</p>
                       {factor.category && (
-                        <span className={`hidden md:inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide border ${catColor}`}>
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide border ${catColor}`}>
                           {factor.category}
                         </span>
                       )}
@@ -400,7 +405,7 @@ const FactorInput: React.FC<Props> = ({ factors, setFactors, onNext }) => {
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-1 ml-4 z-10">
+                <div className="flex items-center gap-2 sm:ml-4 z-10 self-end sm:self-center">
                     <button 
                         type="button"
                         onClick={(e) => { e.stopPropagation(); startEdit(factor); }}

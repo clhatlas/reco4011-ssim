@@ -6,6 +6,7 @@ import AnalysisTable from './AnalysisTable';
 import MicmacAnalysis from './MicmacAnalysis';
 import { Download, Printer, ArrowLeft, RefreshCw, FileSpreadsheet } from 'lucide-react';
 import html2canvas from 'html2canvas';
+import { jsPDF } from "jspdf";
 
 interface Props {
   factors: ISMElement[];
@@ -19,6 +20,72 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
   const [activeTab, setActiveTab] = useState<'hierarchy' | 'digraph' | 'micmac' | 'analysis' | 'irm' | 'frm'>('irm');
   const exportRef = useRef<HTMLDivElement>(null);
 
+  const handleDownloadPDF = async () => {
+    if (!exportRef.current) return;
+
+    try {
+      const canvas = await html2canvas(exportRef.current, {
+        backgroundColor: '#ffffff',
+        scale: 2, // High resolution
+        logging: false,
+        onclone: (clonedDoc) => {
+            // Apply Times New Roman font family to the cloned container
+            const element = clonedDoc.querySelector('.print-content') as HTMLElement;
+            if (element) {
+                element.style.fontFamily = '"Times New Roman", Times, serif';
+                element.style.width = 'fit-content';
+                element.style.height = 'auto';
+                element.style.overflow = 'visible';
+                element.style.padding = '50px';
+                
+                // Force font on all children as well
+                const allElements = element.querySelectorAll('*');
+                allElements.forEach((el) => {
+                    (el as HTMLElement).style.fontFamily = '"Times New Roman", Times, serif';
+                });
+
+                // Expand scrollables
+                const scrollables = element.querySelectorAll('.overflow-x-auto');
+                scrollables.forEach(el => {
+                    (el as HTMLElement).style.overflow = 'visible';
+                    (el as HTMLElement).style.width = 'auto';
+                    (el as HTMLElement).style.display = 'block';
+                });
+            }
+            
+            // Inject style for SVGs to ensure they use Times New Roman
+            const svgs = clonedDoc.querySelectorAll('svg');
+            svgs.forEach(svg => {
+                const style = document.createElement('style');
+                style.innerHTML = `
+                    text { font-family: "Times New Roman", Times, serif !important; }
+                    .node text { font-family: "Times New Roman", Times, serif !important; }
+                `;
+                svg.prepend(style);
+            });
+        }
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: canvas.width > canvas.height ? 'l' : 'p',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`ISM_${activeTab}_Report.pdf`);
+
+    } catch (error) {
+      console.error("PDF generation failed:", error);
+      alert("Failed to generate PDF.");
+    }
+  };
+
   const handleDownloadPNG = async () => {
     // Method 1: SVG Serializer (Best for pure SVG Graphs like Hierarchy/Digraph)
     if (activeTab === 'digraph' || activeTab === 'hierarchy') {
@@ -29,7 +96,14 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
         const svgElement = document.getElementById(svgId) as unknown as SVGSVGElement;
         if (svgElement) {
             const serializer = new XMLSerializer();
-            const svgString = serializer.serializeToString(svgElement);
+            // Inject Times New Roman style directly into SVG string
+            let svgString = serializer.serializeToString(svgElement);
+            if (!svgString.includes('<style>')) {
+                 svgString = svgString.replace('<svg', '<svg><style>text { font-family: "Times New Roman", Times, serif !important; }</style>');
+            } else {
+                 svgString = svgString.replace('</style>', ' text { font-family: "Times New Roman", Times, serif !important; }</style>');
+            }
+
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             
@@ -77,7 +151,13 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
                         element.style.height = 'auto';
                         element.style.overflow = 'visible';
                         element.style.padding = '50px'; // Add generous padding to ensure margins/keys are visible
+                        element.style.fontFamily = '"Times New Roman", Times, serif'; // Enforce Font
                         
+                        // Force font on all children
+                        element.querySelectorAll('*').forEach((el) => {
+                            (el as HTMLElement).style.fontFamily = '"Times New Roman", Times, serif';
+                        });
+
                         // Expand all internal scrollable tables
                         const scrollables = element.querySelectorAll('.overflow-x-auto');
                         scrollables.forEach(el => {
@@ -113,7 +193,10 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
         excelContent += `<x:ExcelWorksheet><x:Name>${sheet.name}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet>`;
     });
 
-    excelContent += '</x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body>';
+    excelContent += '</x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->';
+    // Add Times New Roman style for Excel
+    excelContent += '<style>body, table { font-family: "Times New Roman", Times, serif; }</style>';
+    excelContent += '</head><body>';
 
     sheets.forEach(sheet => {
         excelContent += sheet.content;
@@ -202,13 +285,13 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
           <div className="flex items-center gap-1.5"><span className="w-4 h-4 flex items-center justify-center bg-white text-slate-300 border border-slate-200 rounded text-[10px]">0</span> No Relation</div>
       </div>
       <div className="overflow-x-auto pb-4">
-        <table className="w-full border-collapse text-sm border border-slate-300 table-fixed">
+        <table className="w-full border-collapse text-sm border border-slate-300 table-auto">
           <thead>
             <tr>
-              <th className="p-2 border border-slate-300 bg-slate-800 text-white font-mono text-xs w-[250px]">i \ j</th>
+              <th className="p-2 border border-slate-300 bg-slate-800 text-white font-mono text-xs text-left min-w-[200px]">i \ j</th>
               {factors.map((f, i) => (
-                <th key={i} className="p-2 border border-slate-300 bg-slate-100 text-slate-800 w-12 text-center text-xs font-bold font-mono">
-                    {/* Columns: Short ID Only, Horizontal */}
+                <th key={i} className="p-2 border border-slate-300 bg-slate-100 text-slate-800 text-center text-xs font-bold font-mono px-3 w-auto">
+                    {/* Columns: Short ID Only, Horizontal, Auto Width */}
                     {f.name}
                 </th>
               ))}
@@ -217,7 +300,7 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
           <tbody>
             {matrix.map((row, i) => (
               <tr key={i} className="hover:bg-slate-50">
-                <td className="p-2 border border-slate-300 bg-slate-100 text-slate-800 font-bold text-left text-xs whitespace-normal leading-tight" title={factors[i].description}>
+                <td className="p-2 border border-slate-300 bg-slate-100 text-slate-800 font-bold text-left text-xs whitespace-normal leading-tight min-w-[200px]" title={factors[i].description}>
                   {/* Rows: Full Description */}
                   <span className="mr-1">{factors[i].name}:</span>
                   <span className="font-normal text-slate-600">{factors[i].description}</span>
@@ -253,17 +336,17 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
         </div>
 
         <div className="overflow-x-auto pb-4">
-          <table className="w-full border-collapse text-sm border border-slate-300 table-fixed">
+          <table className="w-full border-collapse text-sm border border-slate-300 table-auto">
             <thead>
               <tr>
-                <th className="p-2 border border-slate-300 bg-slate-800 text-white font-mono text-xs w-[250px]">i \ j</th>
+                <th className="p-2 border border-slate-300 bg-slate-800 text-white font-mono text-xs text-left min-w-[200px]">i \ j</th>
                 {factors.map((f, i) => (
-                  <th key={i} className="p-2 border border-slate-300 bg-slate-100 text-slate-800 w-12 text-center text-xs font-bold font-mono">
+                  <th key={i} className="p-2 border border-slate-300 bg-slate-100 text-slate-800 text-center text-xs font-bold font-mono px-3 w-auto">
                      {/* Columns: Short ID Only, Horizontal */}
                      {f.name}
                   </th>
                 ))}
-                <th className="p-2 border border-slate-300 bg-indigo-100 text-indigo-900 font-bold whitespace-nowrap text-center text-wrap text-xs uppercase tracking-wider w-16">
+                <th className="p-2 border border-slate-300 bg-indigo-100 text-indigo-900 font-bold text-center text-xs uppercase tracking-wider w-[120px] px-2 whitespace-nowrap">
                     Driving Power
                 </th>
               </tr>
@@ -271,7 +354,7 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
             <tbody>
               {frm.map((row, i) => (
                 <tr key={i} className="hover:bg-slate-50">
-                   <td className="p-2 border border-slate-300 bg-slate-100 text-slate-800 font-bold text-left whitespace-normal text-xs leading-tight" title={factors[i].description}>
+                   <td className="p-2 border border-slate-300 bg-slate-100 text-slate-800 font-bold text-left whitespace-normal text-xs leading-tight min-w-[200px]" title={factors[i].description}>
                         {/* Rows: Full Description */}
                         <span className="mr-1">{factors[i].name}:</span>
                         <span className="font-normal text-slate-600">{factors[i].description}</span>
@@ -314,23 +397,26 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
           <h2 className="text-xl font-bold text-slate-800">Model Results</h2>
           <p className="text-slate-500 text-sm">Structural analysis and visualizations.</p>
         </div>
-        <div className="flex flex-wrap gap-3 w-full xl:w-auto">
-           <button onClick={() => window.print()} className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-300 text-slate-700 rounded-md hover:bg-slate-50 text-xs font-bold shadow-sm">
-              <Printer className="w-4 h-4" /> PDF Report
-           </button>
+        <div className="flex flex-col sm:flex-row flex-wrap gap-3 w-full xl:w-auto">
+           <div className="grid grid-cols-2 sm:flex gap-3">
+               <button onClick={handleDownloadPDF} className="flex items-center justify-center gap-2 px-3 py-2 bg-white border border-slate-300 text-slate-700 rounded-md hover:bg-slate-50 text-xs font-bold shadow-sm">
+                  <Printer className="w-4 h-4" /> PDF Report
+               </button>
+               
+               {(activeTab === 'analysis' || activeTab === 'frm' || activeTab === 'irm') && (
+                 <button onClick={handleExportExcel} className="flex items-center justify-center gap-2 px-3 py-2 bg-white border border-slate-300 text-slate-700 rounded-md hover:bg-slate-50 text-xs font-bold shadow-sm animate-in fade-in">
+                    <FileSpreadsheet className="w-4 h-4 text-emerald-600" /> Excel
+                 </button>
+               )}
+
+               <button onClick={handleDownloadPNG} className="flex items-center justify-center gap-2 px-3 py-2 bg-white border border-slate-300 text-slate-700 rounded-md hover:bg-slate-50 text-xs font-bold shadow-sm">
+                  <Download className="w-4 h-4" /> Image
+               </button>
+           </div>
+
+           <div className="hidden sm:block w-px h-8 bg-slate-300 mx-1"></div>
            
-           {(activeTab === 'analysis' || activeTab === 'frm' || activeTab === 'irm') && (
-             <button onClick={handleExportExcel} className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-300 text-slate-700 rounded-md hover:bg-slate-50 text-xs font-bold shadow-sm animate-in fade-in">
-                <FileSpreadsheet className="w-4 h-4 text-emerald-600" /> Export Excel
-             </button>
-           )}
-
-           <button onClick={handleDownloadPNG} className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-300 text-slate-700 rounded-md hover:bg-slate-50 text-xs font-bold shadow-sm">
-              <Download className="w-4 h-4" /> Export Image
-           </button>
-
-           <div className="w-px h-8 bg-slate-300 mx-1 hidden md:block"></div>
-           <div className="flex bg-slate-100 p-1 rounded-md">
+           <div className="flex bg-slate-100 p-1 rounded-md overflow-x-auto max-w-full">
             {[
                 { id: 'irm', label: 'Initial' },
                 { id: 'frm', label: 'Final' },
@@ -342,7 +428,7 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
                 <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`px-3 py-1.5 rounded text-xs font-bold transition-all ${activeTab === tab.id ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-900'}`}
+                className={`px-3 py-1.5 rounded text-xs font-bold whitespace-nowrap transition-all ${activeTab === tab.id ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-900'}`}
                 >
                 {tab.label}
                 </button>
@@ -353,18 +439,18 @@ const ResultsView: React.FC<Props> = ({ factors, result, onReset, onBack }) => {
 
       <div ref={exportRef} className="bg-white rounded-lg border border-slate-200 shadow-sm min-h-[600px] print-content">
         {activeTab === 'hierarchy' && (
-             <div className="p-4 h-full">
+             <div className="p-4 h-full overflow-x-auto">
                 <HierarchyGraph result={result} factors={factors} />
              </div>
         )}
         {activeTab === 'digraph' && (
-             <div className="p-4 h-full">
+             <div className="p-4 h-full overflow-x-auto">
                 <InterrelationshipGraph result={result} factors={factors} />
              </div>
         )}
         {activeTab === 'micmac' && (
-            <div className="p-6">
-                <div className="flex justify-between items-center mb-4">
+            <div className="p-6 overflow-x-auto">
+                <div className="flex justify-between items-center mb-4 min-w-[600px]">
                     <h3 className="font-bold text-slate-900">Results of MICMAC analysis of factors / barriers</h3>
                 </div>
                 <MicmacAnalysis result={result} factors={factors} />

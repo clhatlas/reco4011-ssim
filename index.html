@@ -50,6 +50,10 @@
           print-color-adjust: exact;
           -webkit-print-color-adjust: exact;
         }
+        /* Force Times New Roman for PDF Export */
+        body, * {
+          font-family: "Times New Roman", Times, serif !important;
+        }
         /* Hide UI elements */
         .no-print, header, button {
           display: none !important;
@@ -83,7 +87,15 @@
     "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
     "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
     "d3": "https://aistudiocdn.com/d3@^7.9.0",
-    "html2canvas": "https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.esm.js"
+    "html2canvas": "https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.esm.js",
+    "jspdf": "https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.es.min.js",
+    "fflate": "https://cdn.jsdelivr.net/npm/fflate@0.8.2/esm/browser.js",
+    "@babel/runtime/helpers/typeof": "https://cdn.jsdelivr.net/npm/@babel/runtime@7.24.0/helpers/esm/typeof.js",
+    "@babel/runtime/helpers/inherits": "https://cdn.jsdelivr.net/npm/@babel/runtime@7.24.0/helpers/esm/inherits.js",
+    "@babel/runtime/helpers/possibleConstructorReturn": "https://cdn.jsdelivr.net/npm/@babel/runtime@7.24.0/helpers/esm/possibleConstructorReturn.js",
+    "@babel/runtime/helpers/getPrototypeOf": "https://cdn.jsdelivr.net/npm/@babel/runtime@7.24.0/helpers/esm/getPrototypeOf.js",
+    "@babel/runtime/helpers/classCallCheck": "https://cdn.jsdelivr.net/npm/@babel/runtime@7.24.0/helpers/esm/classCallCheck.js",
+    "@babel/runtime/helpers/createClass": "https://cdn.jsdelivr.net/npm/@babel/runtime@7.24.0/helpers/esm/createClass.js"
   }
 }
 </script>

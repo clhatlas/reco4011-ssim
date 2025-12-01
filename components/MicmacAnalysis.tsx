@@ -98,7 +98,10 @@ const MicmacAnalysis: React.FC<Props> = ({ result, factors }) => {
   useEffect(() => {
     if (!svgRef.current || !containerRef.current) return;
 
-    const width = containerRef.current.clientWidth || 600;
+    // Use a fixed width or responsive logic
+    // On mobile, if container is small, graph will scroll
+    const containerWidth = containerRef.current.clientWidth;
+    const width = Math.max(containerWidth, 600); // Min width 600px
     const height = 500;
     // Increased margins to prevent clipping of axis labels and extreme points
     // top increased to 60 to allow space for labels/legend
@@ -387,9 +390,9 @@ const MicmacAnalysis: React.FC<Props> = ({ result, factors }) => {
   return (
     <div className="flex flex-col gap-8">
         {/* Chart Section */}
-        <div ref={containerRef} className="w-full bg-white rounded-xl border border-slate-200 shadow-sm relative overflow-hidden">
+        <div ref={containerRef} className="w-full bg-white rounded-xl border border-slate-200 shadow-sm relative overflow-x-auto overflow-y-hidden">
             <svg ref={svgRef} className="block mx-auto"></svg>
-            <div className="absolute top-2 right-2 bg-white/90 p-2 text-xs border border-slate-200 rounded shadow-sm z-10">
+            <div className="absolute top-2 right-2 bg-white/90 p-2 text-xs border border-slate-200 rounded shadow-sm z-10" style={{top: '10px', right: '10px'}}>
                 <p><strong>Split Point:</strong> {splitPoint.toFixed(1)}</p>
                 <p><strong>Total Factors:</strong> {factors.length}</p>
             </div>

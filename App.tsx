@@ -64,18 +64,18 @@ const App: React.FC = () => {
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans flex flex-col">
       {/* Professional Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 h-18 flex items-center justify-between py-3">
-          <div className="flex items-center gap-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-auto sm:h-18 flex flex-col sm:flex-row items-center justify-between py-3 gap-3 sm:gap-0">
+          <div className="flex items-center gap-4 w-full sm:w-auto">
             {/* Realistic Construction Logo Badge */}
-            <div className="flex items-center justify-center w-12 h-12 bg-slate-900 rounded-md shadow-sm border-b-2 border-yellow-500">
-               <HardHat className="w-8 h-8 text-yellow-500" strokeWidth={1.5} />
+            <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-slate-900 rounded-md shadow-sm border-b-2 border-yellow-500">
+               <HardHat className="w-6 h-6 sm:w-8 sm:h-8 text-yellow-500" strokeWidth={1.5} />
             </div>
             
             <div className="flex flex-col justify-center">
-              <h1 className="text-xl font-bold text-slate-900 tracking-tight leading-none">
+              <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight leading-none">
                 ISM Tool
               </h1>
-              <p className="text-xs text-slate-500 font-medium tracking-wide mt-1 uppercase">
+              <p className="text-[10px] sm:text-xs text-slate-500 font-medium tracking-wide mt-1 uppercase">
                 SSIM & MICMAC Analysis <span className="text-yellow-600 font-bold px-1 bg-yellow-50 rounded border border-yellow-100 ml-1">TRIAL</span>
               </p>
             </div>
@@ -98,7 +98,7 @@ const App: React.FC = () => {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-6 py-8 print:p-0 flex-grow w-full">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 print:p-0 flex-grow w-full">
         
         {step === AppStep.DEFINE_FACTORS && (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
@@ -113,18 +113,18 @@ const App: React.FC = () => {
                         <div className="p-1.5 bg-white border border-slate-200 rounded text-slate-600">
                           <BookOpen className="w-5 h-5" />
                         </div>
-                        <h2 className="text-base text-lg">User Manual & Workflow</h2>
+                        <h2 className="text-sm sm:text-base lg:text-lg">User Manual & Workflow</h2>
                     </div>
                     {isManualOpen ? <ChevronUp className="w-5 h-5 text-slate-400" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
                 </div>
                 
                 {isManualOpen && (
-                    <div className="p-8 space-y-8 text-slate-600 text-sm leading-relaxed">
+                    <div className="p-4 sm:p-8 space-y-8 text-slate-600 text-sm leading-relaxed">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             <div className="space-y-3">
                                 <div className="flex items-center gap-2 mb-2">
                                     <span className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-900 text-white font-bold text-sm">1</span>
-                                    <h3 className="font-bold text-slate-900 text-lg">Define Factors</h3>
+                                    <h3 className="font-bold text-slate-900 text-base sm:text-lg">Define Factors</h3>
                                 </div>
                                 <p className="text-slate-500 pl-10">
                                     Input the critical risk factors or barriers. For efficiency, download the CSV template and upload large datasets.
@@ -142,7 +142,7 @@ const App: React.FC = () => {
                             <div className="space-y-3">
                                 <div className="flex items-center gap-2 mb-2">
                                     <span className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-900 text-white font-bold text-sm">2</span>
-                                    <h3 className="font-bold text-slate-900 text-lg">Build SSIM</h3>
+                                    <h3 className="font-bold text-slate-900 text-base sm:text-lg">Build SSIM</h3>
                                 </div>
                                 <p className="text-slate-500 pl-10">
                                     Establish pairwise relationships in the Structural Self-Interaction Matrix.
@@ -158,7 +158,7 @@ const App: React.FC = () => {
                             <div className="space-y-3">
                                 <div className="flex items-center gap-2 mb-2">
                                     <span className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-900 text-white font-bold text-sm">3</span>
-                                    <h3 className="font-bold text-slate-900 text-lg">Analysis</h3>
+                                    <h3 className="font-bold text-slate-900 text-base sm:text-lg">Analysis</h3>
                                 </div>
                                 <p className="text-slate-500 pl-10">
                                     Automated generation of structural models:

@@ -85,12 +85,12 @@ const SSIMGrid: React.FC<Props> = ({ factors, ssim, setSsim, onNext, onBack }) =
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 flex flex-col h-[calc(100vh-140px)]">
-      <div className="flex flex-shrink-0 justify-between items-center border-b border-slate-200 pb-4">
+      <div className="flex flex-col sm:flex-row flex-shrink-0 justify-between items-start sm:items-center gap-4 border-b border-slate-200 pb-4">
         <div>
           <h2 className="text-xl font-bold text-slate-800">SSIM Input</h2>
           <p className="text-slate-500 text-sm mt-1">Define upper triangle relationships.</p>
         </div>
-        <div className="flex items-center gap-3 text-xs md:text-sm font-medium">
+        <div className="flex flex-wrap items-center gap-3 text-xs md:text-sm font-medium">
           <div className="flex items-center gap-1.5 px-2 py-1 bg-emerald-50 border border-emerald-100 text-emerald-800 rounded"><span className="font-bold">V</span>: i&rarr;j</div>
           <div className="flex items-center gap-1.5 px-2 py-1 bg-amber-50 border border-amber-100 text-amber-800 rounded"><span className="font-bold">A</span>: j&rarr;i</div>
           <div className="flex items-center gap-1.5 px-2 py-1 bg-blue-50 border border-blue-100 text-blue-800 rounded"><span className="font-bold">X</span>: Mutual</div>
@@ -147,8 +147,8 @@ const SSIMGrid: React.FC<Props> = ({ factors, ssim, setSsim, onNext, onBack }) =
         </table>
       </div>
 
-      <div className="flex-shrink-0 flex justify-between items-center pt-2 pb-4 border-t border-slate-200 bg-slate-50 -mx-6 px-6 -mb-6 rounded-b-lg">
-        <div className="flex gap-3">
+      <div className="flex-shrink-0 flex flex-col sm:flex-row justify-between items-center gap-4 pt-2 pb-4 border-t border-slate-200 bg-slate-50 -mx-4 sm:-mx-6 px-4 sm:px-6 -mb-6 rounded-b-lg">
+        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto justify-center sm:justify-start">
             <button onClick={onBack} className="px-4 py-2 border border-slate-300 bg-white text-slate-600 rounded-md hover:bg-slate-50 text-sm font-medium flex items-center gap-2">
                 <ArrowLeft className="w-4 h-4"/> Back
             </button>
@@ -156,7 +156,7 @@ const SSIMGrid: React.FC<Props> = ({ factors, ssim, setSsim, onNext, onBack }) =
                 <RotateCcw className="w-4 h-4" /> {confirmClear ? "Confirm?" : "Clear"}
             </button>
             
-            <div className="w-px h-8 bg-slate-300 mx-2"></div>
+            <div className="hidden sm:block w-px h-8 bg-slate-300 mx-2"></div>
 
             <input type="file" ref={fileInputRef} onChange={handleImportData} accept=".json" className="hidden" />
             <div className="flex bg-white rounded-md shadow-sm border border-slate-300 overflow-hidden divide-x divide-slate-200">
@@ -169,7 +169,7 @@ const SSIMGrid: React.FC<Props> = ({ factors, ssim, setSsim, onNext, onBack }) =
             </div>
         </div>
         
-        <button onClick={onNext} className="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm rounded-md shadow-sm flex items-center gap-2">
+        <button onClick={onNext} className="w-full sm:w-auto px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm rounded-md shadow-sm flex items-center justify-center gap-2">
           Generate Model <Wand2 className="w-4 h-4" />
         </button>
       </div>
